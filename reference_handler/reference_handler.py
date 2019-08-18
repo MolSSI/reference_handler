@@ -75,7 +75,7 @@ class Reference_Handler(object):
     def _initialize_tables(self):
         
         self.cur.execute(
-            """CREATE TABLE IF NOT EXISTS "Citation" (
+            """CREATE TABLE IF NOT EXISTS "citation" (
             "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
             "raw"	TEXT NOT NULL UNIQUE,
             "doi"	TEXT NOT NULL UNIQUE
@@ -84,7 +84,7 @@ class Reference_Handler(object):
         )
         self.cur.execute(
             """
-            CREATE TABLE IF NOT EXISTS "Context" (
+            CREATE TABLE IF NOT EXISTS "context" (
             "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
             "reference_id" INTEGER NOT NULL,
             "module" TEXT NOT NULL,
@@ -106,7 +106,7 @@ class Reference_Handler(object):
         if raw is not None:
             self.cur.execute(
              """
-             SELECT id FROM Citation WHERE raw=?;
+             SELECT id FROM citation WHERE raw=?;
              """,
              (raw,)
             )
@@ -114,7 +114,7 @@ class Reference_Handler(object):
         if doi is not None and raw is None:
             self.cur.execute(
              """
-             SELECT id FROM Citation WHERE doi=?;
+             SELECT id FROM citation WHERE doi=?;
              """,
              (doi,)
             )
@@ -133,7 +133,7 @@ class Reference_Handler(object):
 
         self.cur.execute(
             """
-            SELECT id FROM Context WHERE reference_id=? AND module=? AND note=? AND level=?;
+            SELECT id FROM context WHERE reference_id=? AND module=? AND note=? AND level=?;
             """, 
             (reference_id, module, note, level)
         )
@@ -152,7 +152,7 @@ class Reference_Handler(object):
 
         self.cur.execute(
             """
-            INSERT INTO Citation (raw, doi) VALUES (?, ?) 
+            INSERT INTO citation (raw, doi) VALUES (?, ?) 
             """,
             (raw, doi)
         )
@@ -166,7 +166,7 @@ class Reference_Handler(object):
 
         self.cur.execute(
             """
-            INSERT INTO Context (reference_id, module, note, count, level) VALUES (?, ?, ?, ?, ?)
+            INSERT INTO context (reference_id, module, note, count, level) VALUES (?, ?, ?, ?, ?)
             """, 
             (reference_id, module, note, 0, level)
         )
@@ -175,7 +175,7 @@ class Reference_Handler(object):
 
     def _print_citations(self):
         self.cur.execute(
-            """SELECT * FROM Citation"""
+            """SELECT * FROM citation"""
         )
         print (self.cur.fetchall())
 
@@ -186,7 +186,7 @@ class Reference_Handler(object):
     def total_citations(self):
 
         self.cur.execute(
-            """SELECT COUNT(*) FROM Citation
+            """SELECT COUNT(*) FROM citation
             """)
 
         return self.cur.fetchall()[0][0]
@@ -198,7 +198,7 @@ class Reference_Handler(object):
 
         self.cur.execute(
             """
-            SELECT COUNT(*) FROM Context WHERE reference_id = ?;
+            SELECT COUNT(*) FROM context WHERE reference_id = ?;
             """, 
             (reference_id,) )
 
