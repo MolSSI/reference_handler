@@ -1,17 +1,4 @@
 """
-#toodo make lowercase name of tables
-#read about index
-#primary keys in more fields of the context
-# PRAGMA foreign_keys = ON maybe
-# do not use autoincrement http://www.sqlitetutorial.net/sqlite-autoincrement/
-# cursor.rowcount()
-# make sure some arguments are optional and required 
-#in get reference id maybe change nested ifs for sqlite OR AND next to WHEReE\
-# make input a dictionary to cite and use kwargs and stuff to make a nice API
-# get rid of class reference_handler and make ti just a module
-# clean the total_context and total_citations return values to make an int
-# get rid of doi as searching option
-
 reference_handler.py
 A Python package that facilitates the citation of scientific material.
 
