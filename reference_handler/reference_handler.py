@@ -60,12 +60,7 @@ class Reference_Handler(object):
         if context_id is None:
             raise NameError("The context ID must be provided")
 
-        self.cur.execute(
-            """
-            UPDATE context SET count = count + 1 WHERE id=?;
-            """,
-            (context_id, )
-        )
+        self.cur.execute("UPDATE context SET count = count + 1 WHERE id=?;", (context_id, ))
 
 
     def _extract_doi(self, raw=None):
@@ -79,11 +74,15 @@ class Reference_Handler(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS "citation" (
             "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
-            "raw"	TEXT NOT NULL UNIQUE,
-            "doi"	TEXT NOT NULL UNIQUE
+            "raw"	TEXT NOT NULL,
+            "doi"	TEXT NOT NULL
             ); 
             """
         )
+
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_raw on citation (raw);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_doi on citation (doi);")
+
         self.cur.execute(
             """
             CREATE TABLE IF NOT EXISTS "context" (
@@ -97,6 +96,12 @@ class Reference_Handler(object):
             );
             """
         )
+
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_refid on context (reference_id);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_module on context (module);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_count on context (count);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_level on context (level);")
+
         self.conn.commit()
 
 
@@ -106,20 +111,10 @@ class Reference_Handler(object):
             raise NameError('Variables "raw" or "DOI" not found.')
 
         if raw is not None:
-            self.cur.execute(
-             """
-             SELECT id FROM citation WHERE raw=?;
-             """,
-             (raw,)
-            )
+            self.cur.execute("SELECT id FROM citation WHERE raw=?;", (raw, ))
 
         if doi is not None and raw is None:
-            self.cur.execute(
-             """
-             SELECT id FROM citation WHERE doi=?;
-             """,
-             (doi,)
-            )
+            self.cur.execute("SELECT id FROM citation WHERE doi=?;" (doi,))
 
         ret = self.cur.fetchall()
 
@@ -133,12 +128,7 @@ class Reference_Handler(object):
         if reference_id is None or module is None or note is None or level is None:
             raise NameError('The variables "reference_id" and "module" and "note" and "level" must be specified')
 
-        self.cur.execute(
-            """
-            SELECT id FROM context WHERE reference_id=? AND module=? AND note=? AND level=?;
-            """, 
-            (reference_id, module, note, level)
-        )
+        self.cur.execute("SELECT id FROM context WHERE reference_id=? AND module=? AND note=? AND level=?;", (reference_id, module, note, level))
 
         ret = self.cur.fetchall()
 
@@ -152,12 +142,7 @@ class Reference_Handler(object):
         if raw is None or doi is None:
             raise NameError('The values for raw and DOI must be provided')
 
-        self.cur.execute(
-            """
-            INSERT INTO citation (raw, doi) VALUES (?, ?) 
-            """,
-            (raw, doi)
-        )
+        self.cur.execute("INSERT INTO citation (raw, doi) VALUES (?, ?);", (raw, doi))
 
         self.conn.commit()
 
@@ -166,12 +151,7 @@ class Reference_Handler(object):
         if reference_id is None:
             raise NameError("Variables 'reference_id' or must be specified.")
 
-        self.cur.execute(
-            """
-            INSERT INTO context (reference_id, module, note, count, level) VALUES (?, ?, ?, ?, ?)
-            """, 
-            (reference_id, module, note, 1, level)
-        )
+        self.cur.execute("INSERT INTO context (reference_id, module, note, count, level) VALUES (?, ?, ?, ?, ?)", (reference_id, module, note, 1, level))
 
         self.conn.commit()
 
@@ -189,18 +169,13 @@ class Reference_Handler(object):
 
         if reference_id is None:
 
-            self.cur.execute(
-                """SELECT COUNT(*) FROM citation
-                """)
+            self.cur.execute("SELECT COUNT(*) FROM citation")
 
             ret = self.cur.fetchall()[0][0] 
 
         else:
 
-            self.cur.execute(
-                """SELECT count FROM context WHERE reference_id=?;
-                """,
-                (reference_id, ))
+            self.cur.execute("SELECT count FROM context WHERE reference_id=?;", (reference_id, ))
 
             ret = self.cur.fetchall()
 
@@ -216,11 +191,7 @@ class Reference_Handler(object):
         if reference_id is None:
                 raise NameError("Variables 'reference_id' must be specified.")
 
-        self.cur.execute(
-            """
-            SELECT COUNT(*) FROM context WHERE reference_id = ?;
-            """, 
-            (reference_id,) )
+        self.cur.execute("SELECT COUNT(*) FROM context WHERE reference_id = ?;", (reference_id,) )
 
         return self.cur.fetchall()[0][0]
 
