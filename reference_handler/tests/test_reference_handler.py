@@ -62,6 +62,7 @@ def test_initialization():
     rf = _create_db()
 
     assert rf.total_citations() == 0
+    assert rf.total_citations(reference_id=2) == None
     assert rf.total_contexts(reference_id=1) == 0
 
 def test_add_new_cite_to_empty_db():
@@ -71,6 +72,7 @@ def test_add_new_cite_to_empty_db():
     rf.cite(raw=lammps_citation, module='test_add_new_cite', level=1, note='This is a test')
 
     assert rf.total_citations() == 1
+    assert rf.total_citations(reference_id=1) == 1
     assert rf.total_contexts(reference_id=1) == 1
 
 def test_add_existing_citation():
@@ -116,3 +118,12 @@ def test_add_new_cite_to_existing_db():
 def test_add_many_cites_and_many_contexts():
 
     pass
+
+def test_count_citations():
+
+    rf = _create_db()
+
+    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
+    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
+
+    assert rf.total_citations(reference_id=1) == 2

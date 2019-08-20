@@ -52,6 +52,21 @@ class Reference_Handler(object):
 
             if context_id is None:
                 self._create_context(reference_id=reference_id, module=module, note=note, level=level)
+            else:
+                self._update_counter(context_id=context_id)
+
+    def _update_counter(self, context_id=None):
+
+        if context_id is None:
+            raise NameError("The context ID must be provided")
+
+        self.cur.execute(
+            """
+            UPDATE context SET count = count + 1 WHERE id=?;
+            """,
+            (context_id, )
+        )
+
 
     def _extract_doi(self, raw=None):
         """ Insert routine to parse DOI from bibliographic format"""
@@ -155,7 +170,7 @@ class Reference_Handler(object):
             """
             INSERT INTO context (reference_id, module, note, count, level) VALUES (?, ?, ?, ?, ?)
             """, 
-            (reference_id, module, note, 0, level)
+            (reference_id, module, note, 1, level)
         )
 
         self.conn.commit()
@@ -170,13 +185,31 @@ class Reference_Handler(object):
 
         self.cur.close()
 
-    def total_citations(self):
+    def total_citations(self, reference_id=None):
 
-        self.cur.execute(
-            """SELECT COUNT(*) FROM citation
-            """)
+        if reference_id is None:
 
-        return self.cur.fetchall()[0][0]
+            self.cur.execute(
+                """SELECT COUNT(*) FROM citation
+                """)
+
+            ret = self.cur.fetchall()[0][0] 
+
+        else:
+
+            self.cur.execute(
+                """SELECT count FROM context WHERE reference_id=?;
+                """,
+                (reference_id, ))
+
+            ret = self.cur.fetchall()
+
+            if len(ret) == 0:
+                return None
+
+            ret = ret[0][0] 
+
+        return ret
 
     def total_contexts(self, reference_id=None):
 
