@@ -19,7 +19,7 @@ class Reference_Handler(object):
         self._initialize_tables()
 
     
-    def cite(self, raw=None, module=None, level=None, note=None, doi=None):
+    def cite(self, raw=None, module=None, level=1, note=None, doi=None):
         """
         Placeholder function to show example docstring (NumPy format)
 
@@ -36,8 +36,8 @@ class Reference_Handler(object):
             Compiled string including quote and optional attribution
         """
 
-        if raw is None or module is None or level is None or note is None:
-            raise NameError('Need to provide the "raw", "module", "level" and "note" arguments')
+        if raw is None or module is None or note is None:
+            raise NameError('Need to provide the "raw", "module" and "note" arguments')
 
         if doi is None:
             doi = self._extract_doi(raw) 

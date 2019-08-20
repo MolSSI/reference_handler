@@ -7,6 +7,7 @@ import os
 import reference_handler
 import pytest
 import sys
+from inspect import signature
 
 database = '/Users/meliseo/Git/reference_handler/reference_handler/tests/data/database.db'
 
@@ -52,13 +53,18 @@ def _create_db():
 
     return reference_handler.Reference_Handler(database)
 
-@pytest.mark.parametrize("test_input", [(None, None, None, None), ('raw', None, None, None),(None, 'raw', None, None), (None, None, 'raw', None), (None, None, None, 'raw')])
-def test_initialization_exceptions(test_input):
+@pytest.fixture(scope='function', params=[x for x in range(len(signature(reference_handler.Reference_Handler.cite).parameters)-1)])
+def create_test_input(request):
+        test_input = [None, None, None, None, None]
+        test_input[request.param] = 'string'
+        yield tuple(test_input)
+
+def test_initialization_exceptions(create_test_input):
 
    with pytest.raises(NameError):
 
+        test_input = create_test_input
         rf = _create_db()
-
         rf.cite(*test_input)
 
 
