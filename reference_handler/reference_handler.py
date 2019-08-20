@@ -88,7 +88,7 @@ class Reference_Handler(object):
     def _get_reference_id(self, raw=None, doi=None):
 
         if raw is None and doi is None:
-            raise NameError('Variables "raw" or "DOI" are required. ')
+            raise NameError('Variables "raw" or "DOI" not found.')
 
         if raw is not None:
             self.cur.execute(
@@ -160,11 +160,11 @@ class Reference_Handler(object):
 
         self.conn.commit()
 
-    def _print_citations(self):
-        self.cur.execute(
-            """SELECT * FROM citation"""
-        )
-        print (self.cur.fetchall())
+#    def _print_citations(self):
+#        self.cur.execute(
+#            """SELECT * FROM citation"""
+#        )
+#        print (self.cur.fetchall())
 
     def __del__(self):
 
