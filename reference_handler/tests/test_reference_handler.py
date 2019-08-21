@@ -115,6 +115,16 @@ def test_add_new_cite_to_existing_db():
     assert rf.total_contexts(reference_id=1) == 1
     assert rf.total_contexts(reference_id=2) == 1
 
+def test_load_bibligraphy():
+
+    rf = _create_db()
+
+    bibfile = '/Users/meliseo/Git/reference_handler/reference_handler/tests/data/library.bib'
+
+    bib = rf.load_bibliography(bibfile=bibfile)
+
+    assert len(list(bib)) == 4
+
 def test_add_many_cites_and_many_contexts():
 
     pass

@@ -9,6 +9,8 @@ import sqlite3
 import os.path
 import random
 import string
+import bibtexparser
+from .utils import entry_to_bibtex
 
 class Reference_Handler(object):
 
@@ -18,7 +20,23 @@ class Reference_Handler(object):
         self.cur = self.conn.cursor()
         self._initialize_tables()
 
-    
+    def load_bibliography(self, bibfile=None):
+       
+        if bibfile is None:
+           raise FileNotFoundError('A bibliography file must be specified.')
+
+        with open(bibfile, 'r') as f:
+            parser = bibtexparser.bparser.BibTexParser(common_strings=True)
+            bibliography = bibtexparser.load(f, parser=parser).entries
+
+        ret = {k['ID']:{} for k in bibliography}
+
+        for entry in bibliography:
+            ret[entry['ID']] = entry_to_bibtex(entry)
+
+        return ret
+
+
     def cite(self, raw=None, module=None, level=1, note=None, doi=None):
         """
         Placeholder function to show example docstring (NumPy format)
