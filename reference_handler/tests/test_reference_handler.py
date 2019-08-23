@@ -7,8 +7,7 @@ import os
 import reference_handler
 import pytest
 import sys
-
-database = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/database.db'
+from . import build_filenames 
 
 lammps_citation = """
         @article{PLIMPTON19951,
@@ -45,11 +44,12 @@ namd_citation = """
 """
 
 
-def _create_db():
+def _create_db(database_name):
     """Boiler plate"""
+    database = build_filenames.build_scratch_filename(database_name)
+
     if os.path.exists(database):
         os.remove(database)
-
     return reference_handler.Reference_Handler(database)
     
     
@@ -59,7 +59,7 @@ def test_reference_handler_imported():
 
 def test_initialization():
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
     assert rf.total_citations() == 0
     assert rf.total_citations(reference_id=2) == None
@@ -67,7 +67,7 @@ def test_initialization():
 
 def test_add_new_cite_to_empty_db():
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
     rf.cite(raw=lammps_citation, module='test_add_new_cite', level=1, note='This is a test')
 
@@ -77,7 +77,7 @@ def test_add_new_cite_to_empty_db():
 
 def test_add_existing_citation():
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='The main LAMMPS paper')
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='The main LAMMPS paper')
@@ -87,7 +87,7 @@ def test_add_existing_citation():
 
 def test_add_new_context():
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 2')
@@ -106,7 +106,7 @@ def test_add_new_context():
 
 def test_add_new_cite_to_existing_db():
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
     rf.cite(raw=namd_citation, module='NAMD', level=1, note='Context 1')
@@ -115,11 +115,11 @@ def test_add_new_cite_to_existing_db():
     assert rf.total_contexts(reference_id=1) == 1
     assert rf.total_contexts(reference_id=2) == 1
 
-def test_load_bibligraphy():
+def test_load_bibliography():
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
-    bibfile = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/library.bib'
+    bibfile = build_filenames.build_data_filename('library.bib')
 
     bib = rf.load_bibliography(bibfile=bibfile)
 
@@ -131,7 +131,7 @@ def test_add_many_cites_and_many_contexts():
 
 def test_count_citations():
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
@@ -140,9 +140,9 @@ def test_count_citations():
 
 def _get_dump(outfile=None):
 
-    rf = _create_db()
+    rf = _create_db('database.db')
 
-    bibfile = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/library.bib'
+    bibfile = build_filenames.build_data_filename('library.bib')
 
     bib = reference_handler.Reference_Handler.load_bibliography(bibfile=bibfile, fmt='bibtex')
 
@@ -168,7 +168,7 @@ def test_dump(name, count):
 
 def test_dump_output():
 
-    outfile = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/outfile.bib'
+    outfile = build_filenames.build_scratch_filename('outfile.bib')
     dump = _get_dump(outfile=outfile) 
 
     assert os.path.exists(outfile) is True

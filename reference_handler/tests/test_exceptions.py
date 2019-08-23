@@ -7,9 +7,10 @@ import os
 import reference_handler
 import pytest
 import sys
+from . import build_filenames 
 from inspect import signature
 
-database = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/database.db'
+database = build_filenames.build_data_filename('database.db')
 
 lammps_citation = """
         @article{PLIMPTON19951,
@@ -48,9 +49,10 @@ namd_citation = """
 
 def _create_db():
     """Boiler plate"""
+    database = build_filenames.build_scratch_filename(database_name)
+
     if os.path.exists(database):
         os.remove(database)
-
     return reference_handler.Reference_Handler(database)
 
 @pytest.fixture(scope='function', params=[x for x in range(len(signature(reference_handler.Reference_Handler.cite).parameters)-1)])
