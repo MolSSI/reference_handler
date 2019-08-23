@@ -20,6 +20,38 @@ class Reference_Handler(object):
         self.cur = self.conn.cursor()
         self._initialize_tables()
 
+    def dump(self, outfile=None, fmt='bibtex'):
+
+        if fmt not in ['bibtex']:
+            raise NameError('Format %s not currently supported.' % (fmt))
+
+        self.cur.execute("""
+            SELECT t1.raw, t2.counts
+            FROM citation t1
+            LEFT JOIN(
+                SELECT id, reference_id, SUM(count) AS counts FROM context 
+                GROUP BY reference_id
+            ) t2
+            ON t1.id = t2.reference_id
+            ORDER BY counts DESC
+        """)
+
+        ret = self.cur.fetchall()
+
+        if outfile is None:
+            return ret
+        else: 
+            if type(outfile) is not str:
+                raise TypeError('The name of the output file must be a string but it is %s' % type(outfile))
+
+            with open(outfile, 'w') as f:
+                for item in ret:
+                    f.write('TOTAL_CITATION_COUNT: %s \n' % str(item[1]))
+                    f.write(item[0])
+
+            return None
+
+
     def load_bibliography(self, bibfile=None):
        
         if bibfile is None:
@@ -172,12 +204,6 @@ class Reference_Handler(object):
         self.cur.execute("INSERT INTO context (reference_id, module, note, count, level) VALUES (?, ?, ?, ?, ?)", (reference_id, module, note, 1, level))
 
         self.conn.commit()
-
-#    def _print_citations(self):
-#        self.cur.execute(
-#            """SELECT * FROM citation"""
-#        )
-#        print (self.cur.fetchall())
 
     def __del__(self):
 

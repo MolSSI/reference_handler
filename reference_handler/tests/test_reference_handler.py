@@ -8,7 +8,7 @@ import reference_handler
 import pytest
 import sys
 
-database = '/Users/meliseo/Git/reference_handler/reference_handler/tests/data/database.db'
+database = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/database.db'
 
 lammps_citation = """
         @article{PLIMPTON19951,
@@ -119,7 +119,7 @@ def test_load_bibligraphy():
 
     rf = _create_db()
 
-    bibfile = '/Users/meliseo/Git/reference_handler/reference_handler/tests/data/library.bib'
+    bibfile = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/library.bib'
 
     bib = rf.load_bibliography(bibfile=bibfile)
 
@@ -137,3 +137,38 @@ def test_count_citations():
     rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
 
     assert rf.total_citations(reference_id=1) == 2
+
+def _get_dump(outfile=None):
+
+    rf = _create_db()
+
+    bibfile = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/library.bib'
+
+    bib = rf.load_bibliography(bibfile=bibfile)
+
+    rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code1', level=1, note='Context1')
+    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')
+    rf.cite(raw=bib['Kilaru.IECR.2008.47.910'], module='Code3', level=1, note='Context1')
+    rf.cite(raw=bib['Argauer.USPatent.1972.3702886'], module='Code1', level=1, note='Context2')
+    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code4', level=1, note='Context1')
+    rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code2', level=3, note='Context1')
+    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')
+
+    dump = rf.dump(outfile=outfile)
+    return dump 
+
+
+@pytest.mark.parametrize('name, count', [('Afzal', 3), ('Jakobtorweihen',2), ('Kilaru', 1), ('Argauer', 1)])
+def test_dump(name, count):
+
+    dump = _get_dump()
+    for item in dump:
+        if name in item[0]:
+            assert item[1] == count
+
+def test_dump_output():
+
+    outfile = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/outfile.bib'
+    dump = _get_dump(outfile=outfile) 
+
+    assert os.path.exists(outfile) is True

@@ -9,7 +9,7 @@ import pytest
 import sys
 from inspect import signature
 
-database = '/Users/meliseo/Git/reference_handler/reference_handler/tests/data/database.db'
+database = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/database.db'
 
 lammps_citation = """
         @article{PLIMPTON19951,
