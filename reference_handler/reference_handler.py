@@ -55,14 +55,12 @@ class Reference_Handler(object):
 
         self.cur.execute("""
             SELECT t1.raw, t2.counts, t2.level 
-            FROM citation t1 
+            FROM citation t1
             LEFT JOIN(
-                SELECT id, reference_id, level, SUM(count) AS counts FROM context 
+                SELECT id, reference_id, level, SUM(count) AS counts FROM context WHERE level <= ?
                 GROUP BY reference_id
             ) t2
-            ON t1.id = t2.reference_id
-            WHERE t2.level <= ?
-            ORDER BY counts DESC 
+            ON t1.id = t2.reference_id WHERE counts > 0 ORDER BY counts DESC 
         """, (level, ))
 
         ret = self.cur.fetchall()

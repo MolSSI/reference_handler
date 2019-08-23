@@ -138,7 +138,7 @@ def test_count_citations():
 
     assert rf.total_citations(reference_id=1) == 2
 
-def _get_dump(outfile=None):
+def _get_dump(outfile=None, level=None):
 
     rf = _create_db('database.db')
 
@@ -154,7 +154,7 @@ def _get_dump(outfile=None):
     rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code2', level=3, note='Context1')
     rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')
 
-    dump = rf.dump(outfile=outfile)
+    dump = rf.dump(outfile=outfile, level=level)
     return dump 
 
 
@@ -162,6 +162,15 @@ def _get_dump(outfile=None):
 def test_dump(name, count):
 
     dump = _get_dump()
+    for item in dump:
+        if name in item[0]:
+            assert item[1] == count
+
+@pytest.mark.parametrize('name, count', [('Afzal', 3), ('Jakobtorweihen',1), ('Kilaru', 1), ('Argauer', 0)])
+def test_dump_with_level(name, count):
+
+    outfile = build_filenames.build_scratch_filename('outfile.bib')
+    dump = _get_dump(outfile=outfile, level=2)
     for item in dump:
         if name in item[0]:
             assert item[1] == count
