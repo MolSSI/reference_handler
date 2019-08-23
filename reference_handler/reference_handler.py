@@ -25,7 +25,7 @@ class Reference_Handler(object):
         self.cur = self.conn.cursor()
         self._initialize_tables()
 
-    def dump(self, outfile=None, fmt='bibtex', level=None):
+    def dump(self, outfile=None, fmt='bibtex', level=3):
         """
         Retrieves the individual citations that were collected during the execution of
         a program and tallies the number of times each citation was referenced.
@@ -49,9 +49,6 @@ class Reference_Handler(object):
 
         if fmt not in supported_fmts:
             raise NameError('Format %s not currently supported.' % (fmt))
-
-        if level is None:
-            level = 3
 
         self.cur.execute("""
             SELECT t1.raw, t2.counts, t2.level 
