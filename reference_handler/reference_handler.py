@@ -1,8 +1,8 @@
 """
-reference_handler.py
+Reference_handler
 A Python package that facilitates the citation of scientific material.
 
-Handles the primary functions
+Handles the primary class
 """
 
 import sqlite3
@@ -12,17 +12,39 @@ import string
 import bibtexparser
 from .utils import entry_to_bibtex
 
+supported_fmts = ['bibtex']
+
 class Reference_Handler(object):
 
     def __init__(self, database):
-
+        """
+        Constructs a reference handler class by connecting to a
+        SQLite database and bulding the two tables within it. 
+        """
         self.conn = sqlite3.connect(database)
         self.cur = self.conn.cursor()
         self._initialize_tables()
 
     def dump(self, outfile=None, fmt='bibtex'):
+        """
+        Retrieves the individual citations that were collected during the execution of
+        a program and tallies the number of times each citation was referenced.
 
-        if fmt not in ['bibtex']:
+        Parameters
+        ----------
+        outfile: str, Optional, default: None
+            The file name where for the dump, if desired. 
+
+        fmt: str, Optional, default: 'bibtex'
+            The format of the dump file, if desired.
+
+        Returns
+        -------
+        ret: list 
+            A list whose elements are tuples containing pairs of raw citations and their counts. 
+        """
+
+        if fmt not in supported_fmts:
             raise NameError('Format %s not currently supported.' % (fmt))
 
         self.cur.execute("""
@@ -38,9 +60,7 @@ class Reference_Handler(object):
 
         ret = self.cur.fetchall()
 
-        if outfile is None:
-            return ret
-        else: 
+        if outfile is not None:
             if type(outfile) is not str:
                 raise TypeError('The name of the output file must be a string but it is %s' % type(outfile))
 
@@ -49,13 +69,34 @@ class Reference_Handler(object):
                     f.write('TOTAL_CITATION_COUNT: %s \n' % str(item[1]))
                     f.write(item[0])
 
-            return None
+        return ret
 
+    def load_bibliography(self, bibfile=None, fmt='bibtex'):
+        """
+        Utility function to read a bibliographic file in common formats. The current
+        supported formats are BibTeX.
 
-    def load_bibliography(self, bibfile=None):
+        Parameters
+        ----------
+        bibfile: str, default: None
+            The file name for the bibliographic file. 
+
+        fmt: str, Optional, default: 'bibtex'
+            The format of the bibliographic file, if desired.
+
+        Returns
+        -------
+        ret: dict 
+            A dictionary whose keys are the identifiers used in the bibliographic file (e.g. the first line in a
+            BibTeX entry) and values are the raw entries found in such file. Note that the values of the dictionary
+            might not be the exactly as found in the original bibliographic file.
+        """
        
         if bibfile is None:
            raise FileNotFoundError('A bibliography file must be specified.')
+
+        if fmt not in supported_fmts:
+            raise NameError('Format %s not currently supported.' % (fmt))
 
         with open(bibfile, 'r') as f:
             parser = bibtexparser.bparser.BibTexParser(common_strings=True)
@@ -69,28 +110,38 @@ class Reference_Handler(object):
         return ret
 
 
-    def cite(self, raw=None, module=None, level=1, note=None, doi=None):
+    def cite(self, raw=None, module=None, level=1, note=None, fmt='bibtex', doi=None):
         """
-        Placeholder function to show example docstring (NumPy format)
-
-        Replace this function and doc string for your own project
+        Adds a given reference to the internal database. 
 
         Parameters
         ----------
-        with_attribution : bool, Optional, default: True
-            Set whether or not to display who the quote is from
+        raw: str, default: None
+            The raw text for a given citation. 
+
+        module: str, default: None
+            The module or function where this citation was called from
+
+        level: int, default: 1
+            The level of importance for this citation. References with the highest priority must have level 1
+            and references with lowest priority must have level 3.
+
+        note: str, default: None
+            A note that describes this citation.
+
+        doi: str, Optional, default: None
+            The digital object identifier if not provided in the raw argument. If provided in raw, DOI in the doi argument
+            will be used.
 
         Returns
         -------
-        quote : str
-            Compiled string including quote and optional attribution
+        None
         """
 
         if raw is None or module is None or note is None:
             raise NameError('Need to provide the "raw", "module" and "note" arguments')
 
-        if doi is None:
-            doi = self._extract_doi(raw) 
+        doi = self._extract_doi(raw, fmt) 
 
         reference_id = self._get_reference_id(raw=raw, doi=doi)
 
@@ -106,26 +157,39 @@ class Reference_Handler(object):
                 self._update_counter(context_id=context_id)
 
     def _update_counter(self, context_id=None):
-
+        """
+        Updates the counter for given context
+        """
         if context_id is None:
             raise NameError("The context ID must be provided")
 
         self.cur.execute("UPDATE context SET count = count + 1 WHERE id=?;", (context_id, ))
 
 
-    def _extract_doi(self, raw=None):
-        """ Insert routine to parse DOI from bibliographic format"""
-        string_length = 10
-        letters = string.ascii_lowercase
-        return  ''.join(random.choice(letters) for i in range(string_length))
-        
+    def _extract_doi(self, raw=None, fmt='bibtex'):
+        """
+        Parses DOI from bibliographic format
+        """
+
+        if fmt not in supported_fmts:
+            raise NameError('Format %s not currently supported.' % (fmt))
+
+        if fmt is 'bibtex':
+            ret = bibtexparser.loads(raw).entries[0] 
+            if 'doi' in ret.keys():
+                return ret['doi']
+            
+
     def _initialize_tables(self):
+        """
+        Initializes the citation and context tables 
+        """
         
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS "citation" (
             "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
             "raw"	TEXT NOT NULL,
-            "doi"	TEXT NOT NULL
+            "doi"	TEXT
             ); 
             """
         )
@@ -156,15 +220,17 @@ class Reference_Handler(object):
 
 
     def _get_reference_id(self, raw=None, doi=None):
+        """
+        Gets the ID of the given raw or doi if exists 
+        """
 
-        if raw is None and doi is None:
-            raise NameError('Variables "raw" or "DOI" not found.')
-
-        if raw is not None:
+        if raw is None:
+            if doi is None:
+                raise NameError('Variables "raw" or "DOI" not found.')
+            else:
+                self.cur.execute("SELECT id FROM citation WHERE doi=?;" (doi,))
+        else:
             self.cur.execute("SELECT id FROM citation WHERE raw=?;", (raw, ))
-
-        if doi is not None and raw is None:
-            self.cur.execute("SELECT id FROM citation WHERE doi=?;" (doi,))
 
         ret = self.cur.fetchall()
 
@@ -174,6 +240,9 @@ class Reference_Handler(object):
         return ret[0][0]
 
     def _get_context_id(self, reference_id=None, module=None, note=None, level=None):
+        """
+        Gets the ID of the context if exists. A context is specified by (reference_id, module, note, level) combination
+        """
 
         if reference_id is None or module is None or note is None or level is None:
             raise NameError('The variables "reference_id" and "module" and "note" and "level" must be specified')
@@ -188,15 +257,21 @@ class Reference_Handler(object):
         return ret[0][0]
 
     def _create_citation(self, raw=None, doi=None):
+        """
+        Adds a new record to the citation table using a raw reference text.  
+        """
 
-        if raw is None or doi is None:
-            raise NameError('The values for raw and DOI must be provided')
-
-        self.cur.execute("INSERT INTO citation (raw, doi) VALUES (?, ?);", (raw, doi))
+        if raw is None: 
+            raise NameError('The value for raw must be provided')
+        else:
+            self.cur.execute("INSERT INTO citation (raw, doi) VALUES (?, ?);", (raw, doi))
 
         self.conn.commit()
 
     def _create_context(self, reference_id=None, module=None, note=None, level=None):
+        """
+        Adds a new record to the context table using the combination of the provided arguments. 
+        """
 
         if reference_id is None:
             raise NameError("Variables 'reference_id' or must be specified.")
@@ -210,6 +285,10 @@ class Reference_Handler(object):
         self.cur.close()
 
     def total_citations(self, reference_id=None):
+        """
+        Returns the total number of citations in the citation table. If reference is provided, returns
+        the total number of citations for a given reference ID.
+        """
 
         if reference_id is None:
 
@@ -231,6 +310,9 @@ class Reference_Handler(object):
         return ret
 
     def total_contexts(self, reference_id=None):
+        """
+        Returns the total number of contexts for a given reference ID.
+        """
 
         if reference_id is None:
                 raise NameError("Variables 'reference_id' must be specified.")

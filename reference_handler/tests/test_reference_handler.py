@@ -144,7 +144,7 @@ def _get_dump(outfile=None):
 
     bibfile = '/Users/eliseo/Git/reference_handler/reference_handler/tests/data/library.bib'
 
-    bib = rf.load_bibliography(bibfile=bibfile)
+    bib = rf.load_bibliography(bibfile=bibfile, fmt='bibtex')
 
     rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code1', level=1, note='Context1')
     rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')

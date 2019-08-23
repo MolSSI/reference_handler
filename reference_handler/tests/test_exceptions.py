@@ -54,16 +54,16 @@ def _create_db():
     return reference_handler.Reference_Handler(database)
 
 @pytest.fixture(scope='function', params=[x for x in range(len(signature(reference_handler.Reference_Handler.cite).parameters)-1)])
-def create_test_input(request):
-        test_input = [None, None, None, None, None]
-        test_input[request.param] = 'string'
-        yield tuple(test_input)
+def create_test_arg(request):
+        test_arg= [None] * (len(signature(reference_handler.Reference_Handler.cite).parameters)-1)
+        test_arg[request.param] = 'string'
+        yield tuple(test_arg)
 
-def test_initialization_exceptions(create_test_input):
+def test_initialization_exceptions(create_test_arg):
 
    with pytest.raises(NameError):
 
-        test_input = create_test_input
+        test_input = create_test_arg
         rf = _create_db()
         rf.cite(*test_input)
 
