@@ -71,7 +71,8 @@ class Reference_Handler(object):
 
         return ret
 
-    def load_bibliography(self, bibfile=None, fmt='bibtex'):
+    @staticmethod
+    def load_bibliography(bibfile=None, fmt='bibtex'):
         """
         Utility function to read a bibliographic file in common formats. The current
         supported formats are BibTeX.
