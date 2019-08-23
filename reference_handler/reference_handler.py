@@ -25,7 +25,7 @@ class Reference_Handler(object):
         self.cur = self.conn.cursor()
         self._initialize_tables()
 
-    def dump(self, outfile=None, fmt='bibtex'):
+    def dump(self, outfile=None, fmt='bibtex', level=None):
         """
         Retrieves the individual citations that were collected during the execution of
         a program and tallies the number of times each citation was referenced.
@@ -38,6 +38,9 @@ class Reference_Handler(object):
         fmt: str, Optional, default: 'bibtex'
             The format of the dump file, if desired.
 
+        level: int, Optional, default: None
+            Only those citations whose level at least the specified by level will be output.
+
         Returns
         -------
         ret: list 
@@ -47,16 +50,20 @@ class Reference_Handler(object):
         if fmt not in supported_fmts:
             raise NameError('Format %s not currently supported.' % (fmt))
 
+        if level is None:
+            level = 3
+
         self.cur.execute("""
-            SELECT t1.raw, t2.counts
-            FROM citation t1
+            SELECT t1.raw, t2.counts, t2.level 
+            FROM citation t1 
             LEFT JOIN(
-                SELECT id, reference_id, SUM(count) AS counts FROM context 
+                SELECT id, reference_id, level, SUM(count) AS counts FROM context 
                 GROUP BY reference_id
             ) t2
             ON t1.id = t2.reference_id
-            ORDER BY counts DESC
-        """)
+            WHERE t2.level <= ?
+            ORDER BY counts DESC 
+        """, (level, ))
 
         ret = self.cur.fetchall()
 
@@ -67,6 +74,7 @@ class Reference_Handler(object):
             with open(outfile, 'w') as f:
                 for item in ret:
                     f.write('TOTAL_CITATION_COUNT: %s \n' % str(item[1]))
+                    f.write('LEVEL: %s \n' % str(item[2]))
                     f.write(item[0])
 
         return ret

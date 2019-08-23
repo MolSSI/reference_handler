@@ -149,7 +149,7 @@ def _get_dump(outfile=None):
     rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code1', level=1, note='Context1')
     rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')
     rf.cite(raw=bib['Kilaru.IECR.2008.47.910'], module='Code3', level=1, note='Context1')
-    rf.cite(raw=bib['Argauer.USPatent.1972.3702886'], module='Code1', level=1, note='Context2')
+    rf.cite(raw=bib['Argauer.USPatent.1972.3702886'], module='Code1', level=3, note='Context2')
     rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code4', level=1, note='Context1')
     rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code2', level=3, note='Context1')
     rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')
