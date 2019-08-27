@@ -62,47 +62,66 @@ def test_initialization():
     rf = _create_db('database.db')
 
     assert rf.total_citations() == 0
-    assert rf.total_citations(reference_id=2) == None
+    assert rf.total_citations(alias='my_alias') == 0
+    assert rf.total_citations(reference_id=2) == 0
+
+    assert rf.total_contexts(alias='my_alias') == 0
     assert rf.total_contexts(reference_id=1) == 0
 
 def test_add_new_cite_to_empty_db():
 
     rf = _create_db('database.db')
 
-    rf.cite(raw=lammps_citation, module='test_add_new_cite', level=1, note='This is a test')
+    rf.cite(raw=lammps_citation, alias='new_citation', module='test_add_new_cite', level=1, note='This is a test')
 
     assert rf.total_citations() == 1
     assert rf.total_citations(reference_id=1) == 1
+    assert rf.total_citations(alias='new_citation') == 1
+
     assert rf.total_contexts(reference_id=1) == 1
+    assert rf.total_contexts(alias='new_citation') == 1
 
 def test_add_existing_citation():
 
     rf = _create_db('database.db')
 
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='The main LAMMPS paper')
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='The main LAMMPS paper')
+    rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='The main LAMMPS paper')
+    rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='The main LAMMPS paper')
 
     assert rf.total_citations() == 1
+    assert rf.total_citations(reference_id=1) == 1
+    assert rf.total_citation(alias='lammps_paper') == 1
     assert rf.total_contexts(reference_id=1) == 1
+    assert rf.total_contexts(alias='lammps_paper') == 1
 
 def test_add_new_context():
 
     rf = _create_db('database.db')
 
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 2')
+    rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='Context 1')
+    rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='Context 2')
 
     assert rf.total_citations() == 1
+    assert rf.total_citations(reference_id=1) == 1
+    assert rf.total_citations(alias='lammps_paper') == 1
     assert rf.total_contexts(reference_id=1) == 2
+    assert rf.total_contexts(alias='lammps_paper') == 2
 
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=2, note='Context 1')
+    rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=2, note='Context 1')
 
     assert rf.total_citations() == 1
+    assert rf.total_citations(reference_id=1) == 1
+    assert rf.total_citations(alias='lammps_paper') == 1
     assert rf.total_contexts(reference_id=1) == 3 
+    assert rf.total_contexts(alias='lammps_paper') == 3
 
-    rf.cite(raw=lammps_citation, module='LAMMPS_2', level=2, note='Context 1')
+    rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS_2', level=2, note='Context 1')
     assert rf.total_citations() == 1
+    assert rf.total_citations(reference_id=1) == 1
+    assert rf.total_citations(alias='lammps_paper') == 1
     assert rf.total_contexts(reference_id=1) == 4
+    assert rf.total_contexts(alias='lammps_paper') == 4
+
 
 def test_add_new_cite_to_existing_db():
 

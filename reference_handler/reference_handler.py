@@ -114,7 +114,7 @@ class Reference_Handler(object):
         return ret
 
 
-    def cite(self, raw=None, module=None, level=1, note=None, fmt='bibtex', doi=None):
+    def cite(self, alias=None, raw=None, module=None, level=1, note=None, fmt='bibtex', doi=None):
         """
         Adds a given reference to the internal database. 
 
@@ -142,15 +142,15 @@ class Reference_Handler(object):
         None
         """
 
-        if raw is None or module is None or note is None:
-            raise NameError('Need to provide the "raw", "module" and "note" arguments')
+        if alias is None or raw is None or module is None or note is None:
+            raise NameError('Need to provide the "alias", "raw", "module" and "note" arguments')
 
         doi = self._extract_doi(raw, fmt) 
 
-        reference_id = self._get_reference_id(raw=raw, doi=doi)
+        reference_id = self._get_reference_id(raw=raw, alias=alias, doi=doi)
 
         if reference_id is None:
-            self._create_citation(raw=raw, doi=doi)
+            self._create_citation(raw=raw, alias=alias, doi=doi)
             self._create_context(reference_id=self.cur.lastrowid, module=module, note=note, level=level)
         else:
             context_id = self._get_context_id(reference_id=reference_id, module=module, note=note, level=level)
@@ -192,13 +192,15 @@ class Reference_Handler(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS "citation" (
             "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
-            "raw"	TEXT NOT NULL,
-            "doi"	TEXT
+            "alias" TEXT NOT NULL UNIQUE, 
+            "raw"	TEXT NOT NULL UNIQUE,
+            "doi"	TEXT UNIQUE
             ); 
             """
         )
 
         self.cur.execute("CREATE INDEX IF NOT EXISTS idx_raw on citation (raw);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_alias on citation (alias);")
         self.cur.execute("CREATE INDEX IF NOT EXISTS idx_doi on citation (doi);")
 
         self.cur.execute(
@@ -223,16 +225,19 @@ class Reference_Handler(object):
         self.conn.commit()
 
 
-    def _get_reference_id(self, raw=None, doi=None):
+    def _get_reference_id(self, raw=None, alias=None, doi=None):
         """
         Gets the ID of the given raw or doi if exists 
         """
 
         if raw is None:
-            if doi is None:
-                raise NameError('Variables "raw" or "DOI" not found.')
+            if alias is None:
+                if doi is None:
+                    raise NameError('Variables "raw" or "alias" or "DOI" must be input.')
+                else:
+                    self.cur.execute("SELECT id FROM citation WHERE doi=?;" (doi,))
             else:
-                self.cur.execute("SELECT id FROM citation WHERE doi=?;" (doi,))
+                self.cur.execute("SELECT id FROM citation WHERE alias=?;" (alias,))
         else:
             self.cur.execute("SELECT id FROM citation WHERE raw=?;", (raw, ))
 
@@ -260,15 +265,15 @@ class Reference_Handler(object):
 
         return ret[0][0]
 
-    def _create_citation(self, raw=None, doi=None):
+    def _create_citation(self, raw=None, alias=None, doi=None):
         """
         Adds a new record to the citation table using a raw reference text.  
         """
 
-        if raw is None: 
-            raise NameError('The value for raw must be provided')
+        if raw is None or alias is None: 
+            raise NameError('The value for raw and alias must be provided')
         else:
-            self.cur.execute("INSERT INTO citation (raw, doi) VALUES (?, ?);", (raw, doi))
+            self.cur.execute("INSERT INTO citation (raw, alias, doi) VALUES (?, ?, ?);", (raw, alias, doi))
 
         self.conn.commit()
 
@@ -288,17 +293,33 @@ class Reference_Handler(object):
 
         self.cur.close()
 
-    def total_citations(self, reference_id=None):
+    def total_citations(self, reference_id=None, alias=None):
         """
         Returns the total number of citations in the citation table. If reference is provided, returns
         the total number of citations for a given reference ID.
         """
 
         if reference_id is None:
+            if alias is None:
 
-            self.cur.execute("SELECT COUNT(*) FROM citation")
+                self.cur.execute("SELECT COUNT(*) FROM citation")
+                ret = self.cur.fetchall()[0][0]
+                return ret
 
-            ret = self.cur.fetchall()[0][0] 
+            else:
+
+                self.cur.execute("""
+                    SELECT t1.id, t1.alias, t2.counts 
+                    FROM citation t1 
+                    INNER JOIN (
+                        SELECT reference_id, SUM(count) AS counts FROM context
+                        GROUP BY reference_id
+                    ) t2
+                    ON t1.id = t2.reference_id 
+                    WHERE t1.alias=?
+                """, (alias, ))
+
+                ret = self.cur.fetchall()
 
         else:
 
@@ -306,22 +327,33 @@ class Reference_Handler(object):
 
             ret = self.cur.fetchall()
 
-            if len(ret) == 0:
-                return None
+        if len(ret) == 0:
+            return 0
 
-            ret = ret[0][0] 
+        ret = ret[0][0] 
 
         return ret
 
-    def total_contexts(self, reference_id=None):
+    def total_contexts(self, reference_id=None, alias=None):
         """
         Returns the total number of contexts for a given reference ID.
         """
 
         if reference_id is None:
-                raise NameError("Variables 'reference_id' must be specified.")
+            if alias is None:
+                raise NameError("Variables 'reference_id' or 'alias' must be specified.")
+            else:
+                self.cur.execute("""
+                    SELECT COUNT(*)
+                    FROM citation
+                    INNER JOIN (
+                        SELECT id, reference_id FROM context
+                    ) t2
+                    ON citation.id = t2.reference_id WHERE alias=?
+                """, (alias, ))
 
-        self.cur.execute("SELECT COUNT(*) FROM context WHERE reference_id = ?;", (reference_id,) )
+        else:
+            self.cur.execute("SELECT COUNT(*) FROM context WHERE reference_id = ?;", (reference_id,) )
 
         return self.cur.fetchall()[0][0]
 
