@@ -92,11 +92,6 @@ def lennard_jones(sigma, epsilon, rij):
     sig_by_r12 = (sig_by_r6 ** 2)
     return 4.0 * epsilon * (sig_by_r12 - sig_by_r6)
 
-def mie(pre, sigma, epsilon, rij)
-    rf.cite(raw=mie_citation, alias='mie_citation', module='mie', 
-	level=1, note='The first version of the Mie potential')
-    return pre / 4.0 * lennard_jones(sigma, epsilon, rij)
-
 rf = reference_handler.Reference_Handler('database.db')
 
 sigma = 3.54
