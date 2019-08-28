@@ -67,13 +67,46 @@ tables.
 to cite a desired reference or a function to dump the contents of the database into a 
 .bib file for subsequent compliation using BibTeX.
 
-## Example
+## Minimal example
 
 ```python
 import reference_handler
 
+lj_citation = """
+@article{lj1924,
+author = {J. E. Jones  and Sydney Chapman },
+title = {On the determination of molecular fields. \&\#x2014;II. From the equation of state of a gas},
+journal = {Proceedings of the Royal Society of London. Series A, Containing Papers of a Mathematical and Physical Character},
+volume = {106},
+number = {738},
+pages = {463-477},
+year = {1924},
+doi = {10.1098/rspa.1924.0082},
+}
+"""
+
+def lennard_jones(sigma, epsilon, rij):
+    rf.cite(raw=lj_citation, alias='lj_citation', module='lennard_jones', 
+	level=1, note='The first version of the Lennard-Jones potential')
+    sig_by_r6 = (sigma / rij ** 6)
+    sig_by_r12 = (sig_by_r6 ** 2)
+    return 4.0 * epsilon * (sig_by_r12 - sig_by_r6)
+
+def mie(pre, sigma, epsilon, rij)
+    rf.cite(raw=mie_citation, alias='mie_citation', module='mie', 
+	level=1, note='The first version of the Mie potential')
+    return pre / 4.0 * lennard_jones(sigma, epsilon, rij)
+
 rf = reference_handler.Reference_Handler('database.db')
 
+sigma = 3.54
+epsilon = 98.0
+pre = 6.75
+rij = 20.0
+lj_energy = lennard_jones(sigma, epsilon, rij)
+mie_energy = 6.75 * mie(pre, sigma, epsilon, rij)
+
+rf.dump(outfile='bibliography.bib)
 ```
 
 ## Installation
