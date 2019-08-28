@@ -16,20 +16,20 @@ software and scientific work. Scientific software developers create
 tools that do not always get cited, as a typical citable
 scientific article might not exist. Although new mechanisms for more
 directly citing software have been recently created (i.e. Zenodo), they have
-not gained widespread use in the community of users. Therefore many
+not gained widespread use in the community of computational
+molecular science. Therefore, many
 software developers feel forced to publish one or more papers on the 
 software, adding more work and introducing a considerable delay.
 
-Method and model developers face a similar problem. For instance, consider
-force field developers who refine their parameters over time, creating a
-new version of the force field on each iteration. The correct references
-can only be determined by looking at the molecule and the parameters.
-
-From the user point of view, it might be very time consuming to go find
-the correct references for all software, model or methods 
-used in a research work. This problem is exponentially exacerbated in work that
+Method and model developers face a similar problem. Consider for instance 
+a molecular dynamics practitioner who needs to develop a new force field using
+specialized quantum mechanical calculation. The practitioner might not be
+fully familiar with the correct references to use for the quantum mechanical software
+and methods. To correctly
+include the references, the model developer might spend a considerable amount of time
+finding out which papers to cite. This problem is exponentially exacerbated in work that
 involves complex workflows running hundreds of different software
-components.
+components that might involve different areas of computational science.
 
 ## Goal
 
@@ -42,6 +42,12 @@ The output of the Reference Handler is a consolidated list of
 references (BibTeX, RIS) to go into the paper with as little effort as possible on the users
 part.
 
+## Audience
+
+**Method and scientific software developers**
+
+**Practitioners**
+
 ## Features
 
 ## Examples
@@ -53,7 +59,6 @@ part.
 ## Contribute
 
 ## Citation
-
 
 ### Copyright
 
