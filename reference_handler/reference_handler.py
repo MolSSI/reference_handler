@@ -6,7 +6,7 @@ Handles the primary class
 """
 
 import sqlite3
-import os.path
+import os
 import random
 import string
 import bibtexparser
@@ -21,6 +21,10 @@ class Reference_Handler(object):
         Constructs a reference handler class by connecting to a
         SQLite database and bulding the two tables within it. 
         """
+
+        if os.path.exists(database):
+            os.remove(database)
+
         self.conn = sqlite3.connect(database)
         self.cur = self.conn.cursor()
         self._initialize_tables()

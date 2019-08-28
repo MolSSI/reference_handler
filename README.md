@@ -86,8 +86,8 @@ doi = {10.1098/rspa.1924.0082},
 """
 
 def lennard_jones(sigma, epsilon, rij):
-    rf.cite(raw=lj_citation, alias='lj_citation', module='lennard_jones', 
-	level=1, note='The first version of the Lennard-Jones potential')
+    rf.cite(raw=lj_citation, alias='lj_citation', module='lennard_jones',
+        level=1, note='The first version of the Lennard-Jones potential')
     sig_by_r6 = (sigma / rij ** 6)
     sig_by_r12 = (sig_by_r6 ** 2)
     return 4.0 * epsilon * (sig_by_r12 - sig_by_r6)
@@ -96,12 +96,11 @@ rf = reference_handler.Reference_Handler('database.db')
 
 sigma = 3.54
 epsilon = 98.0
-pre = 6.75
 rij = 20.0
-lj_energy = lennard_jones(sigma, epsilon, rij)
-mie_energy = 6.75 * mie(pre, sigma, epsilon, rij)
 
-rf.dump(outfile='bibliography.bib)
+lj_energy = lennard_jones(sigma, epsilon, rij)
+
+rf.dump(outfile='bibliography.bib')
 ```
 
 ## Installation
