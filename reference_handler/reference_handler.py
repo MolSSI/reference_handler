@@ -68,7 +68,7 @@ class Reference_Handler(object):
 
             with open(outfile, 'w') as f:
                 for item in ret:
-                    f.write('TOTAL_CITATION_COUNT: %s \n' % str(item[1]))
+                    f.write('TOTAL_MENTIONS: %s \n' % str(item[1]))
                     f.write('LEVEL: %s \n' % str(item[2]))
                     f.write(item[0])
 
@@ -114,12 +114,16 @@ class Reference_Handler(object):
         return ret
 
 
-    def cite(self, alias=None, raw=None, module=None, level=1, note=None, fmt='bibtex', doi=None):
+    def cite(self, raw=None, alias=None, module=None, level=1, note=None, fmt='bibtex', doi=None):
         """
         Adds a given reference to the internal database. 
 
         Parameters
         ----------
+
+        alias: str, default: None
+            A string ID for the citation.
+
         raw: str, default: None
             The raw text for a given citation. 
 
@@ -293,6 +297,44 @@ class Reference_Handler(object):
 
         self.cur.close()
 
+    def total_mentions(self, reference_id=None, alias=None):
+        """
+        Returns the number of times a given citation has been used.
+        """
+        if reference_id is None:
+            if alias is None:
+                raise NameError("The 'reference_id' or 'alias' must be provided.")
+            else:
+                self.cur.execute("""
+                    SELECT t1.alias, t2.counts 
+                    FROM citation t1 
+                    INNER JOIN (
+                        SELECT reference_id, SUM(count) AS counts FROM context
+                        GROUP BY reference_id
+                    ) t2
+                    ON t1.id = t2.reference_id 
+                    WHERE alias = ?
+                """, (alias, ))
+
+        else:
+            self.cur.execute("""
+                SELECT t1.id, t2.counts 
+                FROM citation t1 
+                INNER JOIN (
+                    SELECT reference_id, SUM(count) AS counts FROM context
+                    GROUP BY reference_id
+                ) t2
+                ON t1.id = t2.reference_id 
+                WHERE id = ?
+            """, (reference_id, ))
+
+        ret = self.cur.fetchall()
+
+        if len(ret) == 0:
+            return 0
+
+        return ret[0][1]
+
     def total_citations(self, reference_id=None, alias=None):
         """
         Returns the total number of citations in the citation table. If reference is provided, returns
@@ -307,32 +349,18 @@ class Reference_Handler(object):
                 return ret
 
             else:
-
-                self.cur.execute("""
-                    SELECT t1.id, t1.alias, t2.counts 
-                    FROM citation t1 
-                    INNER JOIN (
-                        SELECT reference_id, SUM(count) AS counts FROM context
-                        GROUP BY reference_id
-                    ) t2
-                    ON t1.id = t2.reference_id 
-                    WHERE t1.alias=?
-                """, (alias, ))
-
-                ret = self.cur.fetchall()
+                self.cur.execute("SELECT COUNT(*) FROM citation WHERE alias = ?", (alias, ))
 
         else:
 
-            self.cur.execute("SELECT count FROM context WHERE reference_id=?;", (reference_id, ))
+            self.cur.execute("SELECT COUNT(*) FROM citation WHERE id=?;", (reference_id, ))
 
-            ret = self.cur.fetchall()
+        ret = self.cur.fetchall()
 
         if len(ret) == 0:
             return 0
 
-        ret = ret[0][0] 
-
-        return ret
+        return ret[0][0]
 
     def total_contexts(self, reference_id=None, alias=None):
         """

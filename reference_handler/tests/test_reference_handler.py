@@ -62,8 +62,12 @@ def test_initialization():
     rf = _create_db('database.db')
 
     assert rf.total_citations() == 0
+
     assert rf.total_citations(alias='my_alias') == 0
-    assert rf.total_citations(reference_id=2) == 0
+    assert rf.total_citations(reference_id=1) == 0
+
+    assert rf.total_mentions(alias='my_alias') == 0
+    assert rf.total_mentions(reference_id=1) == 0
 
     assert rf.total_contexts(alias='my_alias') == 0
     assert rf.total_contexts(reference_id=1) == 0
@@ -75,8 +79,12 @@ def test_add_new_cite_to_empty_db():
     rf.cite(raw=lammps_citation, alias='new_citation', module='test_add_new_cite', level=1, note='This is a test')
 
     assert rf.total_citations() == 1
+
     assert rf.total_citations(reference_id=1) == 1
     assert rf.total_citations(alias='new_citation') == 1
+
+    assert rf.total_mentions(reference_id=1) == 1
+    assert rf.total_mentions(alias='new_citation') == 1
 
     assert rf.total_contexts(reference_id=1) == 1
     assert rf.total_contexts(alias='new_citation') == 1
@@ -89,8 +97,13 @@ def test_add_existing_citation():
     rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='The main LAMMPS paper')
 
     assert rf.total_citations() == 1
+
     assert rf.total_citations(reference_id=1) == 1
-    assert rf.total_citation(alias='lammps_paper') == 1
+    assert rf.total_citations(alias='lammps_paper') == 1
+
+    assert rf.total_mentions(reference_id=1) == 2
+    assert rf.total_mentions(alias='lammps_paper') == 2
+
     assert rf.total_contexts(reference_id=1) == 1
     assert rf.total_contexts(alias='lammps_paper') == 1
 
@@ -102,23 +115,39 @@ def test_add_new_context():
     rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='Context 2')
 
     assert rf.total_citations() == 1
+
     assert rf.total_citations(reference_id=1) == 1
     assert rf.total_citations(alias='lammps_paper') == 1
+
+    assert rf.total_mentions(reference_id=1) == 2
+    assert rf.total_mentions(alias='lammps_paper') == 2
+
     assert rf.total_contexts(reference_id=1) == 2
     assert rf.total_contexts(alias='lammps_paper') == 2
 
     rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=2, note='Context 1')
 
     assert rf.total_citations() == 1
+
     assert rf.total_citations(reference_id=1) == 1
     assert rf.total_citations(alias='lammps_paper') == 1
+
+    assert rf.total_mentions(reference_id=1) == 3
+    assert rf.total_mentions(alias='lammps_paper') == 3
+
     assert rf.total_contexts(reference_id=1) == 3 
     assert rf.total_contexts(alias='lammps_paper') == 3
 
     rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS_2', level=2, note='Context 1')
+
     assert rf.total_citations() == 1
+
     assert rf.total_citations(reference_id=1) == 1
     assert rf.total_citations(alias='lammps_paper') == 1
+
+    assert rf.total_mentions(reference_id=1) == 4
+    assert rf.total_mentions(alias='lammps_paper') == 4
+
     assert rf.total_contexts(reference_id=1) == 4
     assert rf.total_contexts(alias='lammps_paper') == 4
 
@@ -127,12 +156,26 @@ def test_add_new_cite_to_existing_db():
 
     rf = _create_db('database.db')
 
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
-    rf.cite(raw=namd_citation, module='NAMD', level=1, note='Context 1')
+    rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='Context 1')
+    rf.cite(raw=namd_citation, alias='namd_paper', module='NAMD', level=1, note='Context 1')
 
     assert rf.total_citations() == 2
+    assert rf.total_citations(reference_id=1) == 1
+    assert rf.total_citations(reference_id=2) == 1
+
+    assert rf.total_mentions(reference_id=1) == 1
+    assert rf.total_mentions(reference_id=2) == 1
+
+    assert rf.total_citations(alias='lammps_paper') == 1
+    assert rf.total_citations(alias='namd_paper') == 1
+
+    assert rf.total_mentions(alias="lammps_paper") == 1
+    assert rf.total_mentions(alias='namd_paper') == 1
+
     assert rf.total_contexts(reference_id=1) == 1
     assert rf.total_contexts(reference_id=2) == 1
+    assert rf.total_contexts(alias='lammps_paper') == 1
+    assert rf.total_contexts(alias='namd_paper') == 1
 
 def test_load_bibliography():
 
@@ -148,15 +191,6 @@ def test_add_many_cites_and_many_contexts():
 
     pass
 
-def test_count_citations():
-
-    rf = _create_db('database.db')
-
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
-    rf.cite(raw=lammps_citation, module='LAMMPS', level=1, note='Context 1')
-
-    assert rf.total_citations(reference_id=1) == 2
-
 def _get_dump(outfile=None, level=None):
 
     rf = _create_db('database.db')
@@ -165,13 +199,13 @@ def _get_dump(outfile=None, level=None):
 
     bib = reference_handler.Reference_Handler.load_bibliography(bibfile=bibfile, fmt='bibtex')
 
-    rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code1', level=1, note='Context1')
-    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')
-    rf.cite(raw=bib['Kilaru.IECR.2008.47.910'], module='Code3', level=1, note='Context1')
-    rf.cite(raw=bib['Argauer.USPatent.1972.3702886'], module='Code1', level=3, note='Context2')
-    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code4', level=1, note='Context1')
-    rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], module='Code2', level=3, note='Context1')
-    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], module='Code2', level=1, note='Context1')
+    rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], alias='Jakobtorweihen', module='Code1', level=1, note='Context1')
+    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], alias='Afzal',module='Code2', level=1, note='Context1')
+    rf.cite(raw=bib['Kilaru.IECR.2008.47.910'], alias='Kilaru',module='Code3', level=1, note='Context1')
+    rf.cite(raw=bib['Argauer.USPatent.1972.3702886'], alias='Argauer',module='Code1', level=3, note='Context2')
+    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], alias='Afzal',module='Code4', level=1, note='Context1')
+    rf.cite(raw=bib['Jakobtorweihen.JCP.2006.125.224709'], alias='Jakobtorweihen', module='Code2', level=3, note='Context1')
+    rf.cite(raw=bib['Afzal.JCED.2014.59.954'], alias='Afzal', module='Code2', level=1, note='Context1')
 
     dump = rf.dump(outfile=outfile, level=level)
     return dump 
