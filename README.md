@@ -23,7 +23,7 @@ software, adding more work and introducing a considerable delay.
 
 Method and model developers face a similar problem. Consider for instance 
 a molecular dynamics practitioner who needs to develop a new force field using
-specialized quantum mechanical calculation. The practitioner might not be
+a specialized quantum mechanical calculation. The practitioner might not be
 fully familiar with the correct references to use for the quantum mechanical software
 and methods. To correctly
 include the references, the model developer might spend a considerable amount of time
@@ -33,24 +33,48 @@ components that might involve different areas of computational science.
 
 ## Goal
 
-The goal of the Reference Handler is to provide an easy mechanism for
+The goal of the *reference handler* is to provide an easy mechanism for
 developers to record the appropriate references so that users of tools can
 provide a complete set of citations for a particular run of the software in a
 form convenient for the user. 
 
-The output of the Reference Handler is a consolidated list of
+The output of *reference handler* is a consolidated list of
 references (BibTeX, RIS) to go into the paper with as little effort as possible on the users
 part.
 
 ## Audience
 
-**Method and scientific software developers**
+**1. Method and scientific software developers.** 
 
-**Practitioners**
+**2. Computational molecular science practitioners**
 
-## Features
+## Package overview
 
-## Examples
+The reference handler is comprised of the following: 
+
+**1. Central SQLite3 database.** It contains two tables. 
+The first is named *citation* and holds the essential data associated to each unique
+citation, such as the raw citation text and its ID number. 
+The second is the *context* table. It
+contains information about the context in which a given citation was used. For instance, 
+the function where the citation was used or the number times the citation was "mentioned" 
+by any function of your Python package.
+
+Each citation can have many contexts, yielding a one-to-many relationship between the two
+tables. 
+
+**2. Functions to ease the interaction with central database. "** Examples are a function
+to cite a desired reference or a function to dump the contents of the database into a 
+.bib file for subsequent compliation using BibTeX.
+
+## Example
+
+```python
+import reference_handler
+
+rf = reference_handler.Reference_Handler('database.db')
+
+```
 
 ## Installation
 
