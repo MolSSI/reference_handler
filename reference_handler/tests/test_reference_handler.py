@@ -234,3 +234,16 @@ def test_dump_output():
     dump = _get_dump(outfile=outfile) 
 
     assert os.path.exists(outfile) is True
+
+def test_cite_return():
+
+    rf = _create_db('database.db')
+
+    lammps_id1 = rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='Context 1')
+    lammps_id2 = rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='Context 1')
+    lammps_id3 = rf.cite(raw=lammps_citation, alias='lammps_paper', module='LAMMPS', level=1, note='Context 2')
+    namd_id = rf.cite(raw=namd_citation, alias='namd_paper', module='NAMD', level=1, note='Context 1')
+
+    assert lammps_id1 == lammps_id2
+    assert lammps_id1 == lammps_id3
+    assert namd_id == 2

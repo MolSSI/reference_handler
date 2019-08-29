@@ -159,7 +159,8 @@ class Reference_Handler(object):
 
         if reference_id is None:
             self._create_citation(raw=raw, alias=alias, doi=doi)
-            self._create_context(reference_id=self.cur.lastrowid, module=module, note=note, level=level)
+            reference_id = self.cur.lastrowid
+            self._create_context(reference_id=reference_id, module=module, note=note, level=level)
         else:
             context_id = self._get_context_id(reference_id=reference_id, module=module, note=note, level=level)
 
@@ -167,6 +168,8 @@ class Reference_Handler(object):
                 self._create_context(reference_id=reference_id, module=module, note=note, level=level)
             else:
                 self._update_counter(context_id=context_id)
+
+        return reference_id
 
     def _update_counter(self, context_id=None):
         """
