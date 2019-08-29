@@ -216,8 +216,8 @@ def test_dump(name, count):
 
     dump = _get_dump()
     for item in dump:
-        if name in item[0]:
-            assert item[1] == count
+        if name in item[1]:
+            assert item[2] == count
 
 @pytest.mark.parametrize('name, count', [('Afzal', 3), ('Jakobtorweihen',1), ('Kilaru', 1), ('Argauer', 0)])
 def test_dump_with_level(name, count):
@@ -225,8 +225,8 @@ def test_dump_with_level(name, count):
     outfile = build_filenames.build_scratch_filename('outfile.bib')
     dump = _get_dump(outfile=outfile, level=2)
     for item in dump:
-        if name in item[0]:
-            assert item[1] == count
+        if name in item[1]:
+            assert item[2] == count
 
 def test_dump_output():
 
@@ -247,3 +247,4 @@ def test_cite_return():
     assert lammps_id1 == lammps_id2
     assert lammps_id1 == lammps_id3
     assert namd_id == 2
+

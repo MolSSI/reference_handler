@@ -12,7 +12,7 @@ import string
 import bibtexparser
 from .utils import entry_to_bibtex
 
-supported_fmts = ['bibtex']
+supported_fmts = ['bibtex', 'text']
 
 class Reference_Handler(object):
 
@@ -54,8 +54,14 @@ class Reference_Handler(object):
         if fmt not in supported_fmts:
             raise NameError('Format %s not currently supported.' % (fmt))
 
+        if fmt not in supported_fmts:
+            raise NameError('Format %s not currently supported.' % (fmt))
+
+        if level not in range(1, 4) and level is not None:
+            raise ValueError('Invalid value for level. Please input a value in the range [1,3]')
+
         self.cur.execute("""
-            SELECT t1.raw, t2.counts, t2.level 
+            SELECT t1.id, t1.raw, t2.counts, t2.level
             FROM citation t1
             LEFT JOIN(
                 SELECT id, reference_id, level, SUM(count) AS counts FROM context WHERE level <= ?
@@ -64,17 +70,39 @@ class Reference_Handler(object):
             ON t1.id = t2.reference_id WHERE counts > 0 ORDER BY counts DESC 
         """, (level, ))
 
-        ret = self.cur.fetchall()
+        query = self.cur.fetchall()
 
-        if outfile is not None:
-            if type(outfile) is not str:
-                raise TypeError('The name of the output file must be a string but it is %s' % type(outfile))
+        if fmt is 'bibtex':
 
-            with open(outfile, 'w') as f:
-                for item in ret:
-                    f.write('TOTAL_MENTIONS: %s \n' % str(item[1]))
-                    f.write('LEVEL: %s \n' % str(item[2]))
-                    f.write(item[0])
+            ret = query
+
+            if outfile is not None:
+                if type(outfile) is not str:
+                    raise TypeError('The name of the output file must be a string but it is %s' % type(outfile))
+
+                with open(outfile, 'w') as f:
+                    for item in query:
+                        f.write('TOTAL_MENTIONS: %s \n' % str(item[2]))
+                        f.write('LEVEL: %s \n' % str(item[3]))
+                        f.write(item[1])
+
+        elif fmt is 'text':
+
+            ret = []
+
+            for item in query:
+                parse = bibtexparser.loads(item[1]).entries[0]
+
+                fstring = '{authors}; {title}; {journal}; {year}; {volume}; {doi}.\n'
+                plain_text = fstring.format(authors=parse['author'],
+                title=parse['title'],
+                journal=parse['journal'],
+                volume=parse['volume'],
+                number=parse['number'],
+                year=parse['year'],
+                doi=parse['doi'])
+
+                ret.append((item[0], plain_text, item[2], item[3]))
 
         return ret
 
