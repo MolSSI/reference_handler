@@ -432,27 +432,19 @@ class Reference_Handler(object):
 
     def format_misc(self, parse):
         """Format a misc BibTex record"""
+
         result = ''
-        if 'title' in parse:
+
+        if key in ['title', 'ID']:
             result += parse['title']
-        elif 'ID' in parse:
-            result += parse['ID']
 
         if 'version' in parse:
             result += ' version ' + parse['version']
         else:
             result += ', '
 
-        if 'author' in parse:
-            result += ', ' + parse['author']
-
-        if 'organization' in parse:
-            result += ', ' + parse['organization']
-
-        if 'address' in parse:
-            result += ', ' + parse['address']
-
-        if 'url' in parse:
-            result += ', ' + parse['url']
+        for key in ['author', 'organization', 'address', 'url']:
+            if key in parse:
+                result += ', ' + parse[key]
 
         return result
