@@ -7,6 +7,7 @@ Handles the primary class
 
 import sqlite3
 import os
+import pprint
 import random
 import string
 import bibtexparser
@@ -21,9 +22,6 @@ class Reference_Handler(object):
         Constructs a reference handler class by connecting to a
         SQLite database and bulding the two tables within it. 
         """
-
-        if os.path.exists(database):
-            os.remove(database)
 
         self.conn = sqlite3.connect(database)
         self.cur = self.conn.cursor()
@@ -72,7 +70,7 @@ class Reference_Handler(object):
 
         query = self.cur.fetchall()
 
-        if fmt is 'bibtex':
+        if fmt == 'bibtex':
 
             ret = query
 
@@ -86,23 +84,23 @@ class Reference_Handler(object):
                         f.write('LEVEL: %s \n' % str(item[3]))
                         f.write(item[1])
 
-        elif fmt is 'text':
+        elif fmt == 'text':
 
             ret = []
 
             for item in query:
                 parse = bibtexparser.loads(item[1]).entries[0]
 
-                fstring = '{authors}; {title}; {journal}; {year}; {volume}; {doi}.\n'
-                plain_text = fstring.format(authors=parse['author'],
-                title=parse['title'],
-                journal=parse['journal'],
-                volume=parse['volume'],
-                number=parse['number'],
-                year=parse['year'],
-                doi=parse['doi'])
+                fstring = '{author}; {title}; {journal}; {year}; {volume}; {doi}.\n'
+                try:
+                    if parse['ENTRYTYPE'] == 'misc':
+                        plain_text = self.format_misc(parse)
+                    else:
+                        plain_text = fstring.format(**parse)
 
-                ret.append((item[0], plain_text, item[2], item[3]))
+                    ret.append((item[0], plain_text, item[2], item[3]))
+                except KeyError:
+                    pprint.pprint(parse)
 
         return ret
 
@@ -197,6 +195,9 @@ class Reference_Handler(object):
             else:
                 self._update_counter(context_id=context_id)
 
+        # Save the changes!
+        self.conn.commit()
+
         return reference_id
 
     def _update_counter(self, context_id=None):
@@ -217,8 +218,9 @@ class Reference_Handler(object):
         if fmt not in supported_fmts:
             raise NameError('Format %s not currently supported.' % (fmt))
 
-        if fmt is 'bibtex':
-            ret = bibtexparser.loads(raw).entries[0] 
+        if fmt == 'bibtex':
+            ret = bibtexparser.loads(raw)
+            ret = ret.entries[0] 
             if 'doi' in ret.keys():
                 return ret['doi']
             
@@ -329,8 +331,13 @@ class Reference_Handler(object):
         self.conn.commit()
 
     def __del__(self):
-
-        self.cur.close()
+        try:
+            self.conn.commit()
+            self.conn.close()
+            # print('Closed database connection.')
+        except:
+            pass
+            # print('Database was already closed.')
 
     def total_mentions(self, reference_id=None, alias=None):
         """
@@ -422,3 +429,22 @@ class Reference_Handler(object):
 
     def __str__(self):
         pass
+
+    def format_misc(self, parse):
+        """Format a misc BibTex record"""
+
+        result = ''
+
+        if key in ['title', 'ID']:
+            result += parse['title']
+
+        if 'version' in parse:
+            result += ' version ' + parse['version']
+        else:
+            result += ', '
+
+        for key in ['author', 'organization', 'address', 'url']:
+            if key in parse:
+                result += ', ' + parse[key]
+
+        return result
