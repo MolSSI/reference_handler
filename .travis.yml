@@ -27,33 +27,33 @@ jobs:
     language: generic
     env: PYTHON_VER=3.7
     script:
-    - flake8 reference_handler tests
-    - yapf --diff --recursive  reference_handler tests
+    - flake8 reference_handler
+    - yapf --diff --recursive  reference_handler
   - stage: test
     name: Tests on MacOS Python 3.6
     script:
-    - pytest -v tests/
+    - pytest -v reference_handler/tests/
     os: osx
     language: generic
     env: PYTHON_VER=3.6
   - stage: test
     name: Tests on MacOS Python 3.7
     script:
-    - pytest -v tests/
+    - pytest -v reference_handler/tests/
     os: osx
     language: generic
     env: PYTHON_VER=3.7
   - stage: test
     name: Tests on Linux Python 3.6
     script:
-    - pytest -v tests/
+    - pytest -v reference_handler/tests/
     os: linux
     language: generic
     env: PYTHON_VER=3.6
   - stage: test
     name: Tests and coverage on Linux Python 3.7
     script:
-    - pytest -v --cov=reference_handler tests/
+    - pytest -v --cov=reference_handler reference_handler/tests/
     after_success:
     - codecov
     os: linux
