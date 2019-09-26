@@ -1,9 +1,9 @@
 reference_handler
 ==============================
 [//]: # (Badges)
-[![Travis Build Status](https://travis-ci.org/REPLACE_WITH_OWNER_ACCOUNT/reference_handler.png)](https://travis-ci.org/REPLACE_WITH_OWNER_ACCOUNT/reference_handler)
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/REPLACE_WITH_APPVEYOR_LINK/branch/master?svg=true)](https://ci.appveyor.com/project/REPLACE_WITH_OWNER_ACCOUNT/reference_handler/branch/master)
-[![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/reference_handler/branch/master/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/reference_handler/branch/master)
+[![Travis Build Status](https://travis-ci.org/molssi/reference_handler.png)](https://travis-ci.org/molssi/reference_handler)
+[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/REPLACE_WITH_APPVEYOR_LINK/branch/master?svg=true)](https://ci.appveyor.com/project/molssi/reference_handler/branch/master)
+[![codecov](https://codecov.io/gh/molssi/reference_handler/branch/master/graph/badge.svg)](https://codecov.io/gh/molssi/reference_handler/branch/master)
 
 A Python package that creates a consolidated list of references (BibTex, RIS) of scientific material 
 used in a Python package.

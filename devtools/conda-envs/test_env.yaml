@@ -6,11 +6,14 @@ dependencies:
   - pip
 
     # Testing
+  - coverage
+  - flake8
   - pytest
   - pytest-cov
-  - codecov
+  - pytest-runner
 
     # Pip-only installs
-  #- pip:
-  #  - codecov
+  - pip:
+      # Testing
+    - yapf
 

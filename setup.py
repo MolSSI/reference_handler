@@ -18,6 +18,9 @@ try:
 except:
     long_description = "\n".join(short_description[2:])
 
+with open('requirements_install.txt') as fd:
+    requirements = fd.read()
+
 
 setup(
     # Self-descriptive entries which should always be present
@@ -44,10 +47,9 @@ setup(
     # Allows `setup.py test` to work correctly with pytest
     setup_requires=[] + pytest_runner,
 
-    # Additional entries you may want simply uncomment the lines you want and fill in the data
-    # url='http://www.my_package.com',  # Website
     # Required packages, pulls from pip if needed; do not use for Conda deployment
-    install_requires=['bibtexparser'],
+    install_requires=requirements,
+
     # platforms=['Linux',
     #            'Mac OS-X',
     #            'Unix',
@@ -57,4 +59,14 @@ setup(
     # Manual control if final package is compressible or not, set False to prevent the .egg from being made
     # zip_safe=False,
 
+    keywords='reference_handler',
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+    ],
 )
