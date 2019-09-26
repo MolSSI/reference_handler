@@ -4,7 +4,7 @@ A Python package that facilitates the citation of scientific material.
 """
 
 # Add imports here
-from .reference_handler import Reference_Handler
+# from .reference_handler import Reference_Handler
 
 # Handle versioneer
 from ._version import get_versions

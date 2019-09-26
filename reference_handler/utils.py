@@ -1,13 +1,15 @@
 import bibtexparser
 
+
 def _str_or_expr_to_bibtex(e):
-        if isinstance(e, bibtexparser.bibdatabase.BibDataStringExpression):
-            return ' # '.join([_str_or_expr_to_bibtex(s) for s in e.expr])
-        elif isinstance(e, bibtexparser.bibdatabase.BibDataString):
-            return e.name
-        else:
-            return '{' + e + '}'
- 
+    if isinstance(e, bibtexparser.bibdatabase.BibDataStringExpression):
+        return ' # '.join([_str_or_expr_to_bibtex(s) for s in e.expr])
+    elif isinstance(e, bibtexparser.bibdatabase.BibDataString):
+        return e.name
+    else:
+        return '{' + e + '}'
+
+
 def entry_to_bibtex(entry):
 
     bibtex = ''
@@ -23,10 +25,13 @@ def entry_to_bibtex(entry):
                 indent=' ',
                 field=field,
                 field_max_w=0,
-                value=_str_or_expr_to_bibtex(entry[field]))
+                value=_str_or_expr_to_bibtex(entry[field])
+            )
         except TypeError:
-            raise TypeError(u"The field %s in entry %s must be a string"
-                            % (field, entry['ID']))
+            raise TypeError(
+                u"The field %s in entry %s must be a string" %
+                (field, entry['ID'])
+            )
 
     bibtex += "\n}\n\n"
     return bibtex
