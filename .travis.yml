@@ -1,51 +1,78 @@
 language: python
-
-# Run jobs on container-based infrastructure, can be overridden per job
-
-matrix:
-  include:
-    # Extra includes for OSX since python language is not available by default on OSX
-    - os: osx
-      language: generic
-      env: PYTHON_VER=3.6
-    - os: osx
-      language: generic
-      env: PYTHON_VER=3.7
-
-
-    - os: linux
-      language: generic  # No need to set Python version since its conda
-      env: PYTHON_VER=3.6
-    - os: linux
-      language: generic
-      env: PYTHON_VER=3.7
-
-
 before_install:
-    # Additional info about the build
-  - uname -a
-  - df -h
-  - ulimit -a
-
-    # Install the Python environment
-  - source devtools/travis-ci/before_install.sh
-  - python -V
-
+- uname -a
+- df -h
+- ulimit -a
+- source devtools/travis-ci/before_install.sh
+- python -V
 install:
-
-    # Create test environment for package
-  - python devtools/scripts/create_conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/test_env.yaml
-    # Activate the test environment
-  - conda activate test
-    # Build and install package
-  - python setup.py develop --no-deps
-
-
-script:
-  - pytest -v --cov=reference_handler reference_handler/tests/
-
+- python devtools/scripts/create_conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/test_env.yaml
+- conda activate test
+- pip install -e .
+- conda list
+- pip freeze
+matrix:
+  fast_finish: true
 notifications:
-    email: false
-
-after_success:
-  - codecov
+  email: false
+stages:
+- lint
+- test
+- deploy
+jobs:
+  include:
+  - stage: lint
+    name: Check formatting of code for PEP-8
+    os: linux
+    language: generic
+    env: PYTHON_VER=3.7
+    script:
+    - flake8 reference_handler tests
+    - yapf --diff --recursive  reference_handler tests
+  - stage: test
+    name: Tests on MacOS Python 3.6
+    script:
+    - pytest -v tests/
+    os: osx
+    language: generic
+    env: PYTHON_VER=3.6
+  - stage: test
+    name: Tests on MacOS Python 3.7
+    script:
+    - pytest -v tests/
+    os: osx
+    language: generic
+    env: PYTHON_VER=3.7
+  - stage: test
+    name: Tests on Linux Python 3.6
+    script:
+    - pytest -v tests/
+    os: linux
+    language: generic
+    env: PYTHON_VER=3.6
+  - stage: test
+    name: Tests and coverage on Linux Python 3.7
+    script:
+    - pytest -v --cov=reference_handler tests/
+    after_success:
+    - codecov
+    os: linux
+    language: generic
+    env: PYTHON_VER=3.7
+  - stage: deploy
+    name: Deploy to PyPi
+    if: tag IS present
+    dist: xenial
+    python: 3.7
+    script: skip
+    deploy:
+      provider: pypi
+      distributions: sdist bdist_wheel
+      skip_existing: true
+      on:
+        condition: "$TRAVIS_OS_NAME = linux"
+        repo: molssi/reference_handler
+        tags: true
+      user: seamm
+      password:
+        secure: mmfK4KCLK2yxP2hgxTsNGlegjU+CpfxZrqqQXo0YbMgZzcC4aEBMK1hw6v68GEMlnU2GuT3Zxqfem0sK0ILTJfsjagh459Yd+SJzsvVZGOiBFGN1a6n1eCS2fr7tY8C5UzIVCJGg2mDpJolHs8vYN4tVFASP0E3WHf/d1ysN+ht8Bmq6M1U3/0qz9AD8tlI+DRHQO2IcyZzFsJADpqWK9VPGJmMJGxnDYeKdqWM9NbI+vhZLMcUn0FSJwlRBZGPqc4x80cJxJeOCyWpb/Fy2xDJCqyfWKqgbmE27QcAPeI4tBgqmxNY3azcGe12TeiIJ20OJyiyfdjAMPrmOXesY9mkFn/Jb1bRXdEb40kBVSI4B0iOYKbI0/MH8/Hu9dhYIIp0Th/Kupqx+WQrgXsv5aeKzUBoyxF+jfOb99CvZ4r8Cuk2GTdOnl8Q5BInKD+HogN75fHBlf9tYnBieeWOaeEZbr2VDmeCL+3jp8ok+38jFKdjTDKFilRBI9OWd0CG3eqS/pKEDzf1E+q6q3fjQeePFwmSOnLTDamVvghwaWRs1pZbMFhZFK1/CVCcxc4F9Wp1BOWp/aNvaNFERmMKvJ4K/cVIoroIzW+sBypiAYZbftBCAHwy9AH8r9TjuA1hzM1Hdsbjr1u7axWyoWdG3o8t4H50WAa2s/Qmx0vxVdKk=

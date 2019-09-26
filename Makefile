@@ -49,19 +49,17 @@ clean-test: ## remove test and coverage artifacts
 	find . -name '.pytype' -exec rm -fr {} +
 
 lint: ## check style with yapf
-	yapf --diff --recursive  reference_handler tests
-	flake8  reference_handler tests
+	yapf --diff --recursive  reference_handler reference_handler/tests
+	flake8  reference_handler reference_handler/tests
 
 flake: ## check the style with flake8
-	flake8  reference_handler tests
+	flake8  reference_handler reference_handler/tests
 
 format: ## reformat with with yapf and isort
-	yapf --recursive --in-place  reference_handler tests
-	#isort --recursive --atomic  reference_handler tests
+	yapf --recursive --in-place  reference_handler reference_handler/tests
 
 typing: ## check typing
 	pytype reference_handler_ff_util
-#	mypy -p reference_handler_ff_util
 
 test: ## run tests quickly with the default Python
 	pytest
