@@ -47,6 +47,7 @@ namd_citation = """
 
 def _create_db():
     """Boiler plate"""
+    database_name = 'tmp.db'
     database = build_filenames.build_scratch_filename(
         database_name
     )  # noqa: F821
