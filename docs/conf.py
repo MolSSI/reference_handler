@@ -40,6 +40,7 @@ release = ''
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx.ext.mathjax',
 ]
@@ -71,6 +72,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# Whether to include private methods.
+napoleon_include_private_with_doc = False
 
 # -- Options for HTML output -------------------------------------------------
 
