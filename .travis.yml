@@ -92,7 +92,7 @@ jobs:
         on:
           condition: $PYTHON_VER = 3.7
           condition: $TRAVIS_OS_NAME = linux
-          repo: molssi-seamm/reference_handler
+          repo: molssi/reference_handler
           tags: true
         username: seamm
         password:
