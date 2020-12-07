@@ -7,10 +7,149 @@ Handles the primary class
 
 import sqlite3
 import pprint
+import re
+
 import bibtexparser
+from .latex_utf8 import decode_latex
 from .utils import entry_to_bibtex
 
 supported_fmts = ['bibtex', 'text']
+
+# '-' must be first for the regex to work.
+subscript = {
+    '-': '\N{Subscript Minus}',
+    '0': '\N{Subscript Zero}',
+    '1': '\N{Subscript One}',
+    '2': '\N{Subscript Two}',
+    '3': '\N{Subscript Three}',
+    '4': '\N{Subscript Four}',
+    '5': '\N{Subscript Five}',
+    '6': '\N{Subscript Six}',
+    '7': '\N{Subscript Seven}',
+    '8': '\N{Subscript Eight}',
+    '9': '\N{Subscript Nine}',
+    '+': '\N{Subscript Plus Sign}',
+    '=': '\N{Subscript Equals Sign}',
+    '(': '\N{Subscript Left Parenthesis}',
+    ')': '\N{Subscript Right Parenthesis}',
+    'a': '\N{Latin Subscript Small Letter A}',
+    'e': '\N{Latin Subscript Small Letter E}',
+    'o': '\N{Latin Subscript Small Letter O}',
+    'x': '\N{Latin Subscript Small Letter X}',
+    'h': '\N{Latin Subscript Small Letter H}',
+    'k': '\N{Latin Subscript Small Letter K}',
+    'l': '\N{Latin Subscript Small Letter L}',
+    'm': '\N{Latin Subscript Small Letter M}',
+    'n': '\N{Latin Subscript Small Letter N}',
+    'p': '\N{Latin Subscript Small Letter P}',
+    's': '\N{Latin Subscript Small Letter S}',
+    't': '\N{Latin Subscript Small Letter T}',
+    'i': '\N{Latin Subscript Small Letter I}',
+    'r': '\N{Latin Subscript Small Letter R}',
+    'u': '\N{Latin Subscript Small Letter U}',
+    'v': '\N{Latin Subscript Small Letter V}',
+    r'.': '.'
+}
+subscript_re = re.compile(r'\$_([' + ''.join(subscript.keys()) + r']+)\$')
+
+# '-' must be first for the regex to work.
+superscript = {
+    '-': '\N{Superscript Minus}',
+    '0': '\N{Superscript Zero}',
+    '1': '\N{Superscript One}',
+    '2': '\N{Superscript Two}',
+    '3': '\N{Superscript Three}',
+    '4': '\N{Superscript Four}',
+    '5': '\N{Superscript Five}',
+    '6': '\N{Superscript Six}',
+    '7': '\N{Superscript Seven}',
+    '8': '\N{Superscript Eight}',
+    '9': '\N{Superscript Nine}',
+    '+': '\N{Superscript Plus Sign}',
+    '=': '\N{Superscript Equals Sign}',
+    '(': '\N{Superscript Left Parenthesis}',
+    ')': '\N{Superscript Right Parenthesis}',
+    'a': '\N{Feminine Ordinal Indicator}',
+    'b': 'ᵇ',
+    'c': 'ᶜ',
+    'd': 'ᵈ',
+    'e': 'ᵉ',
+    'f': 'ᶠ',
+    'g': 'ᵍ',
+    'h': 'ʰ',
+    'i': 'ⁱ',
+    'j': 'ʲ',
+    'k': 'ᵏ',
+    'l': 'ˡ',
+    'm': 'ᵐ',
+    'n': 'ⁿ',
+    'o': '\N{Masculine Ordinal Indicator}',
+    'p': 'ᵖ',
+    'r': 'ʳ',
+    's': 'ˢ',
+    't': 'ᵗ',
+    'u': 'ᵘ',
+    'v': 'ᵛ',
+    'w': 'ʷ',
+    'x': 'ˣ',
+    'y': 'ʸ',
+    'z': 'ᶻ'
+}
+superscript_re = re.compile(r'\$\^([' + ''.join(superscript.keys()) + r']+)\$')
+
+greek_symbol = {
+    'alpha': '\N{Greek Small Letter Alpha}',
+    'beta': '\N{Greek Small Letter Beta}',
+    'gamma': '\N{Greek Small Letter Gamma}',
+    'delta': '\N{Greek Small Letter Delta}',
+    'epsilon': '\N{Greek Small Letter Epsilon}',
+    'zeta': '\N{Greek Small Letter Zeta}',
+    'eta': '\N{Greek Small Letter Eta}',
+    'theta': '\N{Greek Small Letter Theta}',
+    'iota': '\N{Greek Small Letter Iota}',
+    'kappa': '\N{Greek Small Letter Kappa}',
+    'lamda': '\N{Greek Small Letter Lamda}',
+    'lambda': '\N{Greek Small Letter Lamda}',
+    'mu': '\N{Greek Small Letter Mu}',
+    'nu': '\N{Greek Small Letter Nu}',
+    'xi': '\N{Greek Small Letter Xi}',
+    'omicron': '\N{Greek Small Letter Omicron}',
+    'pi': '\N{Greek Small Letter Pi}',
+    'rho': '\N{Greek Small Letter Rho}',
+    'sigma': '\N{Greek Small Letter Sigma}',
+    'tau': '\N{Greek Small Letter Tau}',
+    'upsilon': '\N{Greek Small Letter Upsilon}',
+    'phi': '\N{Greek Small Letter Phi}',
+    'chi': '\N{Greek Small Letter Chi}',
+    'psi': '\N{Greek Small Letter Psi}',
+    'omega': '\N{Greek Small Letter Omega}',
+    'Alpha': '\N{Greek Capital Letter Alpha}',
+    'Beta': '\N{Greek Capital Letter Beta}',
+    'Gamma': '\N{Greek Capital Letter Gamma}',
+    'Delta': '\N{Greek Capital Letter Delta}',
+    'Epsilon': '\N{Greek Capital Letter Epsilon}',
+    'Zeta': '\N{Greek Capital Letter Zeta}',
+    'Eta': '\N{Greek Capital Letter Eta}',
+    'Theta': '\N{Greek Capital Letter Theta}',
+    'Iota': '\N{Greek Capital Letter Iota}',
+    'Kappa': '\N{Greek Capital Letter Kappa}',
+    'Lamda': '\N{Greek Capital Letter Lamda}',
+    'Lambda': '\N{Greek Capital Letter Lamda}',
+    'Mu': '\N{Greek Capital Letter Mu}',
+    'Nu': '\N{Greek Capital Letter Nu}',
+    'Xi': '\N{Greek Capital Letter Xi}',
+    'Omicron': '\N{Greek Capital Letter Omicron}',
+    'Pi': '\N{Greek Capital Letter Pi}',
+    'Rho': '\N{Greek Capital Letter Rho}',
+    'Sigma': '\N{Greek Capital Letter Sigma}',
+    'Tau': '\N{Greek Capital Letter Tau}',
+    'Upsilon': '\N{Greek Capital Letter Upsilon}',
+    'Phi': '\N{Greek Capital Letter Phi}',
+    'Chi': '\N{Greek Capital Letter Chi}',
+    'Psi': '\N{Greek Capital Letter Psi}',
+    'Omega': '\N{Greek Capital Letter Omega}',
+}
+greek_symbol_re = re.compile(r'\$\\(' + '|'.join(greek_symbol.keys()) + r')\$')
 
 
 class Reference_Handler(object):
@@ -100,19 +239,23 @@ class Reference_Handler(object):
 
             for item in query:
                 parse = bibtexparser.loads(item[1]).entries[0]
+                entry_type = parse['ENTRYTYPE']
+                if entry_type == 'misc':
+                    plain_text = self.format_misc(parse)
+                elif entry_type == 'article':
+                    plain_text = self.format_article(parse)
+                elif entry_type == 'inbook':
+                    plain_text = self.format_inbook(parse)
+                elif entry_type == 'phdthesis':
+                    plain_text = self.format_phdthesis(parse)
+                else:
+                    plain_text = f"Do not have a handler for '{entry_type}':"
+                    plain_text += '\n'
+                    plain_text += pprint.pformat(parse)
 
-                fstring = (
-                    '{author}; {title}; {journal}; {year}; {volume}; {doi}.\n'
-                )
-                try:
-                    if parse['ENTRYTYPE'] == 'misc':
-                        plain_text = self.format_misc(parse)
-                    else:
-                        plain_text = fstring.format(**parse)
-
-                    ret.append((item[0], plain_text, item[2], item[3]))
-                except KeyError:
-                    pprint.pprint(parse)
+                plain_text = decode_latex(plain_text)
+                plain_text = self.decode_math_symbols(plain_text)
+                ret.append((item[0], plain_text, item[2], item[3]))
 
         return ret
 
@@ -529,21 +672,161 @@ class Reference_Handler(object):
     def __str__(self):
         pass
 
-    def format_misc(self, parse):
-        """Format a misc BibTex record"""
+    def format_article(self, data):
+        """Format an article BibTex record
+
+        ACS style:
+            Foster, J. C.; Varlas, S.; Couturaud, B.; Coe, J.; O’Reilly,
+            R. K. Getting into Shape: Reflections on a New Generation of
+            Cylindrical Nanostructures’ Self-Assembly Using Polymer Building
+            Block. J. Am. Chem. Soc. 2019, 141 (7), 2742−2753.
+            DOI: 10.1021/jacs.8b08648
+        """
+
+        result = ''
+        if 'author' in data:
+            result += '; '.join(data['author'].split(' and '))
+            if result[-1] != '.':
+                result += '.'
+        if 'title' in data:
+            result += ' ' + data['title'].rstrip('.') + '.'
+        if 'journal' in data:
+            result += ' ' + data['journal']
+        if 'year' in data:
+            result += f" {data['year']},"
+        if 'volume' in data:
+            result += f" {data['volume']},"
+        if 'pages' in data:
+            result += f" {data['pages']}."
+        if 'doi' in data:
+            result += f" DOI: {data['doi']}"
+
+        return result
+
+    def format_phdthesis(self, data):
+        """Format a PhD Thesis BibTex record
+
+        ACS style:
+            Cable, M. L. Life in Extreme Environments: Lanthanide-Based
+            Detection of Bacterial Spores and Other Sensor Design Pursuits.
+            Ph.D. Dissertation, California Institute of Technology, Pasadena,
+            CA, 2010.
+            http://resolver.caltech.edu/CaltechTHESIS:05102010-145436548
+            (accessed 2019-09-10).
+        """
+
+        result = ''
+        if 'author' in data:
+            result += '; '.join(data['author'].split(' and '))
+            if result[-1] != '.':
+                result += '.'
+        if 'title' in data:
+            result += ' ' + data['title'].rstrip('.') + '.'
+        result += " Ph.D. Dissertation"
+        if 'school' in data:
+            result += f", {data['school']}"
+        if 'address' in data:
+            result += f", {data['address']}"
+        if 'year' in data:
+            result += f", {data['year']}."
+        if 'url' in data:
+            result += f", {data['url']}"
+        if 'doi' in data:
+            result += f", DOI: {data['doi']}"
+
+        return result
+
+    def format_misc(self, data):
+        """Format a misc BibTex record, used for software
+
+        Author 1; Author 2; etc. Program Title, version or edition; Publisher:
+        Place of Publication, Year.
+
+        Example:
+            Binkley, J. S. GAUSSIAN82; Department of Chemistry, Carnegie Mellon
+            University: Pittsburgh, PA, 1982.
+        """
 
         result = ''
 
-        if 'title' in parse:
-            result += parse['title']
-
-        if 'version' in parse:
-            result += ' version ' + parse['version']
+        if 'author' in data:
+            result += '; '.join(data['author'].split(' and '))
+            if result[-1] != '.':
+                result += '.'
+        if 'title' in data:
+            result += ' ' + data['title']
+        if 'version' in data:
+            result += f", version {data['version']};"
         else:
-            result += ', '
+            result += ';'
 
-        for key in ['author', 'organization', 'address', 'url']:
-            if key in parse:
-                result += ', ' + parse[key]
+        if 'organization' in data:
+            result += ' ' + data['organization']
+        if 'address' in data:
+            result += f": {data['address']}"
+        if 'url' in data:
+            result += f", {data['url']}"
+        if 'doi' in data:
+            result += f", DOI: {data['doi']}"
 
         return result
+
+    def format_inbook(self, data):
+        """Format a chapter or part of a book or series BibTex record
+
+        ACS style:
+            Bard, A. J.; Faulkner, L. R. Double-Layer Structure and Absorption.
+            In Electrochemical Methods: Fundamentals and Applications, 2nd ed.;
+            John Wiley & Sons, 2001; pp 534−579.
+
+        for series:
+            Gaede, H. C. Professional Development for REU Students. In Best
+            Practices for Chemistry REU Programs; Griep, M. A, Watkins, L.,
+            Eds.; ACS Symposium Series, Vol. 1295; American Chemical Society,
+            2018; pp 33−44. DOI: 10.1021/bk-2018-1295.ch003
+        """
+
+        result = ''
+        if 'author' in data:
+            result += '; '.join(data['author'].split(' and '))
+            if result[-1] != '.':
+                result += '.'
+        if 'title' in data:
+            result += ' ' + data['title'].rstrip('.') + '. In'
+        if 'booktitle' in data:
+            result += f" {data['booktitle']}"
+        if 'series' in data:
+            result += f"; {data['series']}"
+        if 'publisher' in data:
+            result += f"; {data['publisher']}"
+        if 'place' in data:
+            result += f", {data['place']}"
+        if 'year' in data:
+            result += f", {data['year']}."
+        if 'url' in data:
+            result += f", {data['url']}"
+        if 'doi' in data:
+            result += f", DOI: {data['doi']}"
+
+        return result
+
+    def decode_math_symbols(self, text):
+        """Clean up math symbols such as subscripts."""
+        text = greek_symbol_re.sub(self._decode_greek_symbol, text)
+        text = superscript_re.sub(self._decode_superscript, text)
+        return subscript_re.sub(self._decode_subscript, text)
+
+    def _decode_subscript(self, match):
+        result = ''
+        for digit in list(match[1]):
+            result += subscript[digit]
+        return result
+
+    def _decode_superscript(self, match):
+        result = ''
+        for digit in list(match[1]):
+            result += superscript[digit]
+        return result
+
+    def _decode_greek_symbol(self, match):
+        return greek_symbol[match[1]]
