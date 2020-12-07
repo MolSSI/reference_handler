@@ -110,6 +110,9 @@ class Reference_Handler(object):
                     else:
                         plain_text = fstring.format(**parse)
 
+                    # BibTex may have lots of braces ... so remove them
+                    plain_text = plain_text.replace('{', '').replace('}', '')
+
                     ret.append((item[0], plain_text, item[2], item[3]))
                 except KeyError:
                     pprint.pprint(parse)
