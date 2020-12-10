@@ -164,6 +164,15 @@ class Reference_Handler(object):
         self.cur = self.conn.cursor()
         self._initialize_tables()
 
+    def __del__(self):
+        try:
+            self.conn.commit()
+            self.conn.close()
+            # print('Closed database connection.')
+        except:  # noqa: E722
+            pass
+            # print('Database was already closed.')
+
     def dump(self, outfile=None, fmt='bibtex', level=3):
         """
         Retrieves the individual citations that were collected during the
@@ -553,15 +562,6 @@ class Reference_Handler(object):
         )
 
         self.conn.commit()
-
-    def __del__(self):
-        try:
-            self.conn.commit()
-            self.conn.close()
-            # print('Closed database connection.')
-        except:  # noqa: E722
-            pass
-            # print('Database was already closed.')
 
     def total_mentions(self, reference_id=None, alias=None):
         """
