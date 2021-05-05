@@ -1,6 +1,7 @@
 include LICENSE
 include MANIFEST.in
 include versioneer.py
+include requirements*.txt
 
 graft reference_handler
 global-exclude *.py[cod] __pycache__ *.so
