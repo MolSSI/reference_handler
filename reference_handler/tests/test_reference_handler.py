@@ -49,6 +49,10 @@ def _create_db(database_name):
 
     if os.path.exists(database):
         os.remove(database)
+
+    # Make in memory to avoid issues testing on Windows, where the file is
+    # not immediately release.
+    # database = "file:reference_db?mode=memory&cache=shared"
     return reference_handler.Reference_Handler(database)
 
 
