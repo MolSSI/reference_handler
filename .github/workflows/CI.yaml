@@ -45,7 +45,7 @@ jobs:
     - name: Run linters
       shell: bash -l {0}
       run: |
-        flake8 reference_handler tests
+        flake8 reference_handler
         yapf --diff --recursive reference_handler
       
   test:
