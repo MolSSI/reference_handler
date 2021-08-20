@@ -62,7 +62,7 @@ by any function of your Python package.
 Each citation can have many contexts, yielding a one-to-many relationship between the two
 tables. 
 
-**2. Functions to ease the interaction with central database. ** Examples are a function
+**2. Functions to ease the interaction with central database.** Examples are a function
 to cite a desired reference or a function to dump the contents of the database into a 
 .bib file for subsequent compliation using BibTeX.
 
