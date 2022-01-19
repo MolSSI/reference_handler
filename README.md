@@ -6,65 +6,93 @@ reference_handler
 [![codecov](https://codecov.io/gh/molssi/reference_handler/branch/master/graph/badge.svg)](https://codecov.io/gh/molssi/reference_handler/branch/master)
 [![Documentation Status](https://readthedocs.org/projects/reference-handler/badge/?version=latest)](https://reference-handler.readthedocs.io/en/latest/?badge=latest)
 
-A Python package that creates a consolidated list of references (BibTex, RIS) of scientific material 
-used in a Python package.
+A python package for scientific software citation.
 
-### Motivation
+## Motivation & goal
 
-Authors of modeling tools (scientific software, method or model
-developers) currently find it difficult to get fair attribution to their
-software and scientific work. Scientific software developers create
-tools that do not always get cited, as a typical citable
-scientific article might not exist. Although new mechanisms for more
-directly citing software have been recently created (i.e. Zenodo), they have
-not gained widespread use in the community of computational
-molecular science. 
-
-Method and model developers face a similar problem. Consider for instance 
-a molecular dynamics practitioner who needs to develop a new force field using
-a specialized quantum mechanical calculation. The practitioner might not be
-fully familiar with the correct references to use for the quantum mechanical software
-and methods. To correctly
-include the references, the model developer might spend a considerable amount of time
-finding out which papers to cite. This problem is exponentially exacerbated in work that
-involves complex workflows running hundreds of different software
-components that might involve different areas of computational science.
-
-## Goal
-
-The goal of the *reference handler* is to provide an easy mechanism for
-developers to record the appropriate references so that users of tools can
-provide a complete set of citations for a particular run of the software in a
-form convenient for the user. 
-
-The output of *reference handler* is a consolidated list of
-references (BibTeX, RIS) to go into the paper with as little effort as possible on the users
-part.
-
-## Audience
-
-**1. Method and scientific software developers.** 
-
-**2. Computational molecular science practitioners**
+An appropriate recognition of the value of the scientific software on an equal footing with 
+scholarly manuscripts and datasets is dependent upon the realization and promotion of
+community guidelines and best practices for software citation. Such practices can improve 
+reproducibility and validation of the scientific discoveries, encourage software reuse and 
+boost collaborative efforts.
 
 ## Package overview
 
-The reference handler is comprised of the following: 
+The *reference handler* is comprised of two core parts:
 
-**1. Central SQLite3 database.** It contains two tables. 
-The first is named *citation* and holds the essential data associated to each unique
-citation, such as the raw citation text and its ID number. 
-The second is the *context* table. It
-contains information about the context in which a given citation was used. For instance, 
-the function where the citation was used or the number of times the citation was "mentioned" 
-by any function of your Python package.
+**1. Central SQLite3 database** which contains two tables:
+(i) the *citation* table which hosts all essential data pertinent to each unique citation,
+such as the raw citation text and its ID number, and (ii) the *context* table which contains
+information about the context in which a given citation was used. For instance, the function
+where the citation was used or the number of times the citation was "mentioned"
+by any function of your Python package. Since each citation can have many contexts, a
+one-to-many relationship exist between the *citation* and the *context* tables, respectively.
 
-Each citation can have many contexts, yielding a one-to-many relationship between the two
-tables. 
+**2. Functions to ease the interaction with central database.** Examples are a function
+to cite a desired reference or a function to dump the contents of the database into a
+`.bib` file for subsequent compilation using BibTeX.
 
-**2. Functions to ease the interaction with central database. ** Examples are a function
-to cite a desired reference or a function to dump the contents of the database into a 
-.bib file for subsequent compliation using BibTeX.
+## Audience
+
+* 1. Method and scientific software developers.
+* 2. Computational molecular science practitioners
+
+## Main features
+
+* Automatic and seamless runtime citation to all adopted software modules in the executed program
+* Managing citations within complex workflows and interoperable environments conveniently with simple syntax and APIs
+* Providing context and number of counts for all modules used in the executed application
+* Prioritization of all cited modules at different levels
+* Recommended citation style according to the community guidelines and best practices
+* Exporting references as databases and formatted documents in BibTeX and RIS
+
+## Installation
+
+* **Step 1**: Clone this repository on a host machine:
+
+```bash
+$ git clone git@github.com:MolSSI/reference_handler.git
+```
+
+* **Step 2**: Change the current directory to *reference_handler's* root directory:
+
+```bash
+$ cd <path-to-reference-handler-root-directory>/reference_handler
+```
+
+* **Step 3**: Create a Conda environment with *python 3.9* and *pip*:
+
+```bash
+$ conda create -n <env-name> python=3.9 pip
+```
+
+replace the `<env-name>` with the desired name of your environment.
+
+* **Step 4**: Activate your conda environment:
+
+```bash
+$ conda activate <env-name>
+```
+
+* **Step 5**: Run the following command to install *bibtexparser 1.2.0* using pip
+within your conda environment
+
+```bash
+$ pip install bibtexparser==1.2.0 
+```
+
+* **Step 6**: Finally, run the following command to install *reference_handler* in
+your conda environment
+
+```bash
+$ make install 
+```
+
+* **Step 7 (optional)**: Make sure all tests run without errors
+
+```bash
+$ pytest -v
+```
 
 ## Minimal example
 
@@ -102,19 +130,24 @@ lj_energy = lennard_jones(sigma, epsilon, rij)
 rf.dump(outfile='bibliography.bib')
 ```
 
-## Installation
-
 ## Documentation
 
-## Contribute
+The documentation is under development. Please check back later.
 
-## Citation
+## References
 
-### Copyright
+* [Katz, D. S., Chue Hong, N. P., Clark T., Muench, A., Stall, S., Bouquin, D., Cannon, M., Edmunds, S., Faez, T., Farmer, R., \
+Feeney, P., Fenner, M., Friedman, M., Grenier, G., Harrison, M., Heber, J., Leary, A., MacCallum, C., Murray, H., ... Yeston, J. \
+(2020) Recognizing the value of software: a software citation guide. F1000 Research. https://doi.org/10.12688/f1000research.26932.2](https://doi.org/10.12688/f1000research.26932.2)
 
-Copyright (c) 2019, MolSSI
+* [Smith A. M., Katz D. S., Niemeyer K. E., FORCE11 Software Citation Working Group.2016. \
+Software citation principles. PeerJ Computer Science 2:e86 https://doi.org/10.7717/peerj-cs.86](https://doi.org/10.7717/peerj-cs.86)
 
-#### Acknowledgements
+## Copyright
+
+Copyright (c) 2019-2022, MolSSI
+
+## Acknowledgements
  
-Project based on the 
+Project based on the
 [Computational Molecular Science Python Cookiecutter](https://github.com/molssi/cookiecutter-cms) version 1.0.
