@@ -10,17 +10,11 @@ A python package for scientific software citation.
 
 ## Motivation & goal
 
-To recognize the value of software in scientific research by promoting best practices
-in software citation. Such practices lead to the treatment of software attribution and
-credit at an equal footing with respect to scholarly manuscripts and datasets, improves
-reproducibility and validation of the scientific discoveries, and encourages software reuse
-and collaborative efforts.
-
-## Audience
-
-**1. Method and scientific software developers.**
-
-**2. Computational molecular science practitioners**
+An appropriate recognition of the value of the scientific software on an equal footing with 
+scholarly manuscripts and datasets is dependent upon the realization and promotion of
+community guidelines and best practices for software citation. Such practices can improve 
+reproducibility and validation of the scientific discoveries, encourage software reuse and 
+boost collaborative efforts.
 
 ## Package overview
 
@@ -37,6 +31,11 @@ one-to-many relationship exist between the *citation* and the *context* tables, 
 **2. Functions to ease the interaction with central database.** Examples are a function
 to cite a desired reference or a function to dump the contents of the database into a
 `.bib` file for subsequent compilation using BibTeX.
+
+## Audience
+
+* 1. Method and scientific software developers.
+* 2. Computational molecular science practitioners
 
 ## Main features
 
