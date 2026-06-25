@@ -1,3 +1,4 @@
+MODULE := reference_handler
 .PHONY: clean clean-test clean-pyc clean-build docs help
 .DEFAULT_GOAL := help
 define BROWSER_PYSCRIPT
@@ -48,15 +49,12 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	find . -name '.pytype' -exec rm -fr {} +
 
-lint: ## check style with yapf
-	yapf --diff --recursive  reference_handler
-	flake8  reference_handler
-
-flake: ## check the style with flake8
-	flake8  reference_handler reference_handler/tests
+lint: ## check style with black and flake8
+	black --extend-exclude '_version.py' --check --diff $(MODULE) $(MODULE)/tests
+	flake8 --color never $(MODULE) $(MODULE)/tests
 
 format: ## reformat with with yapf and isort
-	yapf --recursive --in-place  reference_handler
+	black --extend-exclude '_version.py' $(MODULE) $(MODULE)/tests
 
 typing: ## check typing
 	pytype reference_handler_ff_util
@@ -88,17 +86,27 @@ docs: ## generate Sphinx HTML documentation, including API docs
 servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
-release: clean ## package and upload a release
-	python setup.py sdist bdist_wheel
+release: dist ## package and upload a release
 	python -m twine upload dist/*
 
+check-release: dist ## check the release for errors
+	python -m twine check dist/*
+
 dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+	python -m build
 	ls -l dist
 
 install: uninstall ## install the package to the active Python's site-packages
-	python setup.py install
+	pip install .
 
 uninstall: clean ## uninstall the package
-	pip uninstall --yes reference_handler
+	pip uninstall --yes $(MODULE)
+
+.PHONY: update
+update: ## post-release: sync main and dev, reinstall, run checks, push dev
+	git checkout main
+	git pull
+	git checkout dev
+	git merge --ff-only main
+	$(MAKE) lint install test
+	git push
