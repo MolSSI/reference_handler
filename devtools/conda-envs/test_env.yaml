@@ -15,7 +15,7 @@ dependencies:
 
     # Pip-only installs
   - pip:
-    - bibtexparser
+    - bibtexparser<2
     
       # Testing
     - yapf
