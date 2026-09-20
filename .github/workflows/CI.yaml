@@ -23,7 +23,7 @@ on:
 
 jobs:
   lint:
-    name: Lint ubuntu-latest Py3.8
+    name: Lint ubuntu-latest Py3.12
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
     # More info on options: https://github.com/conda-incubator/setup-miniconda
     - uses: conda-incubator/setup-miniconda@v3
       with:
-        python-version: 3.8
+        python-version: "3.12"
         environment-file: devtools/conda-envs/test_env.yaml
         activate-environment: test
         auto-update-conda: false
@@ -51,8 +51,9 @@ jobs:
     - name: Run linters
       shell: bash -l {0}
       run: |
-        flake8 reference_handler
-        yapf --diff --recursive reference_handler
+        black --extend-exclude '_version.py' --check --diff \
+            reference_handler reference_handler/tests
+        flake8 --color never reference_handler reference_handler/tests
       
   test:
     name: Test ${{ matrix.os }} Py${{ matrix.python-version }}
