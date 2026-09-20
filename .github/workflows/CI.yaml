@@ -13,14 +13,20 @@ on:
     # Run by default Sunday morning at 3:30:
     #   Scheduled workflows run on the latest commit on the default or base branch.
     #   (from https://help.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule)
+    #
+    # GitHub disables a scheduled workflow after 60 days without a commit to the
+    # repository, and disabling it stops the push and pull_request triggers too.
+    # If the badge goes stale, re-enable it on the Actions tab; workflow_dispatch
+    # below gives a way to run it by hand.
     - cron: "30 3 * * 0"
+  workflow_dispatch:
 
 jobs:
   lint:
     name: Lint ubuntu-latest Py3.8
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Additional info about the build
       shell: bash
       run: |
@@ -28,7 +34,7 @@ jobs:
         df -h
         ulimit -a
     # More info on options: https://github.com/conda-incubator/setup-miniconda
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         python-version: 3.8
         environment-file: devtools/conda-envs/test_env.yaml
@@ -55,16 +61,16 @@ jobs:
     strategy:
       matrix:
         os: [macOS-latest, ubuntu-latest]
-        python-version: [3.7, 3.8]
+        python-version: ["3.11", "3.12"]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Additional info about the build
       shell: bash
       run: |
         uname -a
         df -h
         ulimit -a
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         python-version: ${{ matrix.python-version }}
         environment-file: devtools/conda-envs/test_env.yaml
@@ -82,7 +88,7 @@ jobs:
       run: |
         pytest -v --cov=reference_handler --cov-report=xml --color=yes reference_handler/tests/
     - name: CodeCov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
