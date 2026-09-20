@@ -13,143 +13,143 @@ import bibtexparser
 from .latex_utf8 import decode_latex
 from .utils import entry_to_bibtex
 
-supported_fmts = ['bibtex', 'text']
+supported_fmts = ["bibtex", "text"]
 
 # '-' must be first for the regex to work.
 subscript = {
-    '-': '\N{Subscript Minus}',
-    '0': '\N{Subscript Zero}',
-    '1': '\N{Subscript One}',
-    '2': '\N{Subscript Two}',
-    '3': '\N{Subscript Three}',
-    '4': '\N{Subscript Four}',
-    '5': '\N{Subscript Five}',
-    '6': '\N{Subscript Six}',
-    '7': '\N{Subscript Seven}',
-    '8': '\N{Subscript Eight}',
-    '9': '\N{Subscript Nine}',
-    '+': '\N{Subscript Plus Sign}',
-    '=': '\N{Subscript Equals Sign}',
-    '(': '\N{Subscript Left Parenthesis}',
-    ')': '\N{Subscript Right Parenthesis}',
-    'a': '\N{Latin Subscript Small Letter A}',
-    'e': '\N{Latin Subscript Small Letter E}',
-    'o': '\N{Latin Subscript Small Letter O}',
-    'x': '\N{Latin Subscript Small Letter X}',
-    'h': '\N{Latin Subscript Small Letter H}',
-    'k': '\N{Latin Subscript Small Letter K}',
-    'l': '\N{Latin Subscript Small Letter L}',
-    'm': '\N{Latin Subscript Small Letter M}',
-    'n': '\N{Latin Subscript Small Letter N}',
-    'p': '\N{Latin Subscript Small Letter P}',
-    's': '\N{Latin Subscript Small Letter S}',
-    't': '\N{Latin Subscript Small Letter T}',
-    'i': '\N{Latin Subscript Small Letter I}',
-    'r': '\N{Latin Subscript Small Letter R}',
-    'u': '\N{Latin Subscript Small Letter U}',
-    'v': '\N{Latin Subscript Small Letter V}',
-    r'.': '.'
+    "-": "\N{SUBSCRIPT MINUS}",
+    "0": "\N{SUBSCRIPT ZERO}",
+    "1": "\N{SUBSCRIPT ONE}",
+    "2": "\N{SUBSCRIPT TWO}",
+    "3": "\N{SUBSCRIPT THREE}",
+    "4": "\N{SUBSCRIPT FOUR}",
+    "5": "\N{SUBSCRIPT FIVE}",
+    "6": "\N{SUBSCRIPT SIX}",
+    "7": "\N{SUBSCRIPT SEVEN}",
+    "8": "\N{SUBSCRIPT EIGHT}",
+    "9": "\N{SUBSCRIPT NINE}",
+    "+": "\N{SUBSCRIPT PLUS SIGN}",
+    "=": "\N{SUBSCRIPT EQUALS SIGN}",
+    "(": "\N{SUBSCRIPT LEFT PARENTHESIS}",
+    ")": "\N{SUBSCRIPT RIGHT PARENTHESIS}",
+    "a": "\N{LATIN SUBSCRIPT SMALL LETTER A}",
+    "e": "\N{LATIN SUBSCRIPT SMALL LETTER E}",
+    "o": "\N{LATIN SUBSCRIPT SMALL LETTER O}",
+    "x": "\N{LATIN SUBSCRIPT SMALL LETTER X}",
+    "h": "\N{LATIN SUBSCRIPT SMALL LETTER H}",
+    "k": "\N{LATIN SUBSCRIPT SMALL LETTER K}",
+    "l": "\N{LATIN SUBSCRIPT SMALL LETTER L}",
+    "m": "\N{LATIN SUBSCRIPT SMALL LETTER M}",
+    "n": "\N{LATIN SUBSCRIPT SMALL LETTER N}",
+    "p": "\N{LATIN SUBSCRIPT SMALL LETTER P}",
+    "s": "\N{LATIN SUBSCRIPT SMALL LETTER S}",
+    "t": "\N{LATIN SUBSCRIPT SMALL LETTER T}",
+    "i": "\N{LATIN SUBSCRIPT SMALL LETTER I}",
+    "r": "\N{LATIN SUBSCRIPT SMALL LETTER R}",
+    "u": "\N{LATIN SUBSCRIPT SMALL LETTER U}",
+    "v": "\N{LATIN SUBSCRIPT SMALL LETTER V}",
+    r".": ".",
 }
-subscript_re = re.compile(r'\$_([' + ''.join(subscript.keys()) + r']+)\$')
+subscript_re = re.compile(r"\$_([" + "".join(subscript.keys()) + r"]+)\$")
 
 # '-' must be first for the regex to work.
 superscript = {
-    '-': '\N{Superscript Minus}',
-    '0': '\N{Superscript Zero}',
-    '1': '\N{Superscript One}',
-    '2': '\N{Superscript Two}',
-    '3': '\N{Superscript Three}',
-    '4': '\N{Superscript Four}',
-    '5': '\N{Superscript Five}',
-    '6': '\N{Superscript Six}',
-    '7': '\N{Superscript Seven}',
-    '8': '\N{Superscript Eight}',
-    '9': '\N{Superscript Nine}',
-    '+': '\N{Superscript Plus Sign}',
-    '=': '\N{Superscript Equals Sign}',
-    '(': '\N{Superscript Left Parenthesis}',
-    ')': '\N{Superscript Right Parenthesis}',
-    'a': '\N{Feminine Ordinal Indicator}',
-    'b': 'ᵇ',
-    'c': 'ᶜ',
-    'd': 'ᵈ',
-    'e': 'ᵉ',
-    'f': 'ᶠ',
-    'g': 'ᵍ',
-    'h': 'ʰ',
-    'i': 'ⁱ',
-    'j': 'ʲ',
-    'k': 'ᵏ',
-    'l': 'ˡ',
-    'm': 'ᵐ',
-    'n': 'ⁿ',
-    'o': '\N{Masculine Ordinal Indicator}',
-    'p': 'ᵖ',
-    'r': 'ʳ',
-    's': 'ˢ',
-    't': 'ᵗ',
-    'u': 'ᵘ',
-    'v': 'ᵛ',
-    'w': 'ʷ',
-    'x': 'ˣ',
-    'y': 'ʸ',
-    'z': 'ᶻ'
+    "-": "\N{SUPERSCRIPT MINUS}",
+    "0": "\N{SUPERSCRIPT ZERO}",
+    "1": "\N{SUPERSCRIPT ONE}",
+    "2": "\N{SUPERSCRIPT TWO}",
+    "3": "\N{SUPERSCRIPT THREE}",
+    "4": "\N{SUPERSCRIPT FOUR}",
+    "5": "\N{SUPERSCRIPT FIVE}",
+    "6": "\N{SUPERSCRIPT SIX}",
+    "7": "\N{SUPERSCRIPT SEVEN}",
+    "8": "\N{SUPERSCRIPT EIGHT}",
+    "9": "\N{SUPERSCRIPT NINE}",
+    "+": "\N{SUPERSCRIPT PLUS SIGN}",
+    "=": "\N{SUPERSCRIPT EQUALS SIGN}",
+    "(": "\N{SUPERSCRIPT LEFT PARENTHESIS}",
+    ")": "\N{SUPERSCRIPT RIGHT PARENTHESIS}",
+    "a": "\N{FEMININE ORDINAL INDICATOR}",
+    "b": "ᵇ",
+    "c": "ᶜ",
+    "d": "ᵈ",
+    "e": "ᵉ",
+    "f": "ᶠ",
+    "g": "ᵍ",
+    "h": "ʰ",
+    "i": "ⁱ",
+    "j": "ʲ",
+    "k": "ᵏ",
+    "l": "ˡ",
+    "m": "ᵐ",
+    "n": "ⁿ",
+    "o": "\N{MASCULINE ORDINAL INDICATOR}",
+    "p": "ᵖ",
+    "r": "ʳ",
+    "s": "ˢ",
+    "t": "ᵗ",
+    "u": "ᵘ",
+    "v": "ᵛ",
+    "w": "ʷ",
+    "x": "ˣ",
+    "y": "ʸ",
+    "z": "ᶻ",
 }
-superscript_re = re.compile(r'\$\^([' + ''.join(superscript.keys()) + r']+)\$')
+superscript_re = re.compile(r"\$\^([" + "".join(superscript.keys()) + r"]+)\$")
 
 greek_symbol = {
-    'alpha': '\N{Greek Small Letter Alpha}',
-    'beta': '\N{Greek Small Letter Beta}',
-    'gamma': '\N{Greek Small Letter Gamma}',
-    'delta': '\N{Greek Small Letter Delta}',
-    'epsilon': '\N{Greek Small Letter Epsilon}',
-    'zeta': '\N{Greek Small Letter Zeta}',
-    'eta': '\N{Greek Small Letter Eta}',
-    'theta': '\N{Greek Small Letter Theta}',
-    'iota': '\N{Greek Small Letter Iota}',
-    'kappa': '\N{Greek Small Letter Kappa}',
-    'lamda': '\N{Greek Small Letter Lamda}',
-    'lambda': '\N{Greek Small Letter Lamda}',
-    'mu': '\N{Greek Small Letter Mu}',
-    'nu': '\N{Greek Small Letter Nu}',
-    'xi': '\N{Greek Small Letter Xi}',
-    'omicron': '\N{Greek Small Letter Omicron}',
-    'pi': '\N{Greek Small Letter Pi}',
-    'rho': '\N{Greek Small Letter Rho}',
-    'sigma': '\N{Greek Small Letter Sigma}',
-    'tau': '\N{Greek Small Letter Tau}',
-    'upsilon': '\N{Greek Small Letter Upsilon}',
-    'phi': '\N{Greek Small Letter Phi}',
-    'chi': '\N{Greek Small Letter Chi}',
-    'psi': '\N{Greek Small Letter Psi}',
-    'omega': '\N{Greek Small Letter Omega}',
-    'Alpha': '\N{Greek Capital Letter Alpha}',
-    'Beta': '\N{Greek Capital Letter Beta}',
-    'Gamma': '\N{Greek Capital Letter Gamma}',
-    'Delta': '\N{Greek Capital Letter Delta}',
-    'Epsilon': '\N{Greek Capital Letter Epsilon}',
-    'Zeta': '\N{Greek Capital Letter Zeta}',
-    'Eta': '\N{Greek Capital Letter Eta}',
-    'Theta': '\N{Greek Capital Letter Theta}',
-    'Iota': '\N{Greek Capital Letter Iota}',
-    'Kappa': '\N{Greek Capital Letter Kappa}',
-    'Lamda': '\N{Greek Capital Letter Lamda}',
-    'Lambda': '\N{Greek Capital Letter Lamda}',
-    'Mu': '\N{Greek Capital Letter Mu}',
-    'Nu': '\N{Greek Capital Letter Nu}',
-    'Xi': '\N{Greek Capital Letter Xi}',
-    'Omicron': '\N{Greek Capital Letter Omicron}',
-    'Pi': '\N{Greek Capital Letter Pi}',
-    'Rho': '\N{Greek Capital Letter Rho}',
-    'Sigma': '\N{Greek Capital Letter Sigma}',
-    'Tau': '\N{Greek Capital Letter Tau}',
-    'Upsilon': '\N{Greek Capital Letter Upsilon}',
-    'Phi': '\N{Greek Capital Letter Phi}',
-    'Chi': '\N{Greek Capital Letter Chi}',
-    'Psi': '\N{Greek Capital Letter Psi}',
-    'Omega': '\N{Greek Capital Letter Omega}',
+    "alpha": "\N{GREEK SMALL LETTER ALPHA}",
+    "beta": "\N{GREEK SMALL LETTER BETA}",
+    "gamma": "\N{GREEK SMALL LETTER GAMMA}",
+    "delta": "\N{GREEK SMALL LETTER DELTA}",
+    "epsilon": "\N{GREEK SMALL LETTER EPSILON}",
+    "zeta": "\N{GREEK SMALL LETTER ZETA}",
+    "eta": "\N{GREEK SMALL LETTER ETA}",
+    "theta": "\N{GREEK SMALL LETTER THETA}",
+    "iota": "\N{GREEK SMALL LETTER IOTA}",
+    "kappa": "\N{GREEK SMALL LETTER KAPPA}",
+    "lamda": "\N{GREEK SMALL LETTER LAMDA}",
+    "lambda": "\N{GREEK SMALL LETTER LAMDA}",
+    "mu": "\N{GREEK SMALL LETTER MU}",
+    "nu": "\N{GREEK SMALL LETTER NU}",
+    "xi": "\N{GREEK SMALL LETTER XI}",
+    "omicron": "\N{GREEK SMALL LETTER OMICRON}",
+    "pi": "\N{GREEK SMALL LETTER PI}",
+    "rho": "\N{GREEK SMALL LETTER RHO}",
+    "sigma": "\N{GREEK SMALL LETTER SIGMA}",
+    "tau": "\N{GREEK SMALL LETTER TAU}",
+    "upsilon": "\N{GREEK SMALL LETTER UPSILON}",
+    "phi": "\N{GREEK SMALL LETTER PHI}",
+    "chi": "\N{GREEK SMALL LETTER CHI}",
+    "psi": "\N{GREEK SMALL LETTER PSI}",
+    "omega": "\N{GREEK SMALL LETTER OMEGA}",
+    "Alpha": "\N{GREEK CAPITAL LETTER ALPHA}",
+    "Beta": "\N{GREEK CAPITAL LETTER BETA}",
+    "Gamma": "\N{GREEK CAPITAL LETTER GAMMA}",
+    "Delta": "\N{GREEK CAPITAL LETTER DELTA}",
+    "Epsilon": "\N{GREEK CAPITAL LETTER EPSILON}",
+    "Zeta": "\N{GREEK CAPITAL LETTER ZETA}",
+    "Eta": "\N{GREEK CAPITAL LETTER ETA}",
+    "Theta": "\N{GREEK CAPITAL LETTER THETA}",
+    "Iota": "\N{GREEK CAPITAL LETTER IOTA}",
+    "Kappa": "\N{GREEK CAPITAL LETTER KAPPA}",
+    "Lamda": "\N{GREEK CAPITAL LETTER LAMDA}",
+    "Lambda": "\N{GREEK CAPITAL LETTER LAMDA}",
+    "Mu": "\N{GREEK CAPITAL LETTER MU}",
+    "Nu": "\N{GREEK CAPITAL LETTER NU}",
+    "Xi": "\N{GREEK CAPITAL LETTER XI}",
+    "Omicron": "\N{GREEK CAPITAL LETTER OMICRON}",
+    "Pi": "\N{GREEK CAPITAL LETTER PI}",
+    "Rho": "\N{GREEK CAPITAL LETTER RHO}",
+    "Sigma": "\N{GREEK CAPITAL LETTER SIGMA}",
+    "Tau": "\N{GREEK CAPITAL LETTER TAU}",
+    "Upsilon": "\N{GREEK CAPITAL LETTER UPSILON}",
+    "Phi": "\N{GREEK CAPITAL LETTER PHI}",
+    "Chi": "\N{GREEK CAPITAL LETTER CHI}",
+    "Psi": "\N{GREEK CAPITAL LETTER PSI}",
+    "Omega": "\N{GREEK CAPITAL LETTER OMEGA}",
 }
-greek_symbol_re = re.compile(r'\$\\(' + '|'.join(greek_symbol.keys()) + r')\$')
+greek_symbol_re = re.compile(r"\$\\(" + "|".join(greek_symbol.keys()) + r")\$")
 
 
 class Reference_Handler(object):
@@ -173,7 +173,7 @@ class Reference_Handler(object):
             pass
             # print('Database was already closed.')
 
-    def dump(self, outfile=None, fmt='bibtex', level=3):
+    def dump(self, outfile=None, fmt="bibtex", level=3):
         """
         Retrieves the individual citations that were collected during the
         execution of a program and tallies the number of times each citation
@@ -199,15 +199,14 @@ class Reference_Handler(object):
         """
 
         if fmt not in supported_fmts:
-            raise NameError('Format %s not currently supported.' % (fmt))
+            raise NameError("Format %s not currently supported." % (fmt))
 
         if fmt not in supported_fmts:
-            raise NameError('Format %s not currently supported.' % (fmt))
+            raise NameError("Format %s not currently supported." % (fmt))
 
         if level not in range(1, 4) and level is not None:
             raise ValueError(
-                'Invalid value for level. Please input a value in the range '
-                '[1,3]'
+                "Invalid value for level. Please input a value in the range [1,3]"
             )
 
         self.cur.execute(
@@ -220,46 +219,49 @@ class Reference_Handler(object):
                 GROUP BY reference_id
             ) t2
             ON t1.id = t2.reference_id WHERE counts > 0 ORDER BY counts DESC
-        """, (level,)
+        """,
+            (level,),
         )
 
         query = self.cur.fetchall()
 
-        if fmt == 'bibtex':
+        if fmt == "bibtex":
 
             ret = query
 
             if outfile is not None:
                 if type(outfile) is not str:
                     raise TypeError(
-                        'The name of the output file must be a string but it '
-                        'is %s' % type(outfile)
+                        "The name of the output file must be a string but it "
+                        "is %s" % type(outfile)
                     )
 
-                with open(outfile, 'w') as f:
+                with open(outfile, "w") as f:
                     for item in query:
-                        f.write('TOTAL_MENTIONS: %s \n' % str(item[2]))
-                        f.write('LEVEL: %s \n' % str(item[3]))
+                        f.write("TOTAL_MENTIONS: %s \n" % str(item[2]))
+                        f.write("LEVEL: %s \n" % str(item[3]))
                         f.write(item[1])
 
-        elif fmt == 'text':
+        elif fmt == "text":
 
             ret = []
 
             for item in query:
                 parse = bibtexparser.loads(item[1]).entries[0]
-                entry_type = parse['ENTRYTYPE']
-                if entry_type == 'misc':
+                entry_type = parse["ENTRYTYPE"]
+                if entry_type == "misc":
                     plain_text = self.format_misc(parse)
-                elif entry_type == 'article':
+                elif entry_type == "software":
+                    plain_text = self.format_software(parse)
+                elif entry_type == "article":
                     plain_text = self.format_article(parse)
-                elif entry_type == 'inbook':
+                elif entry_type == "inbook":
                     plain_text = self.format_inbook(parse)
-                elif entry_type == 'phdthesis':
+                elif entry_type == "phdthesis":
                     plain_text = self.format_phdthesis(parse)
                 else:
                     plain_text = f"Do not have a handler for '{entry_type}':"
-                    plain_text += '\n'
+                    plain_text += "\n"
                     plain_text += pprint.pformat(parse)
 
                 plain_text = decode_latex(plain_text)
@@ -269,7 +271,7 @@ class Reference_Handler(object):
         return ret
 
     @staticmethod
-    def load_bibliography(bibfile=None, fmt='bibtex'):
+    def load_bibliography(bibfile=None, fmt="bibtex"):
         """
         Utility function to read a bibliographic file in common formats.
         The current supported formats are BibTeX.
@@ -293,19 +295,19 @@ class Reference_Handler(object):
         """
 
         if bibfile is None:
-            raise FileNotFoundError('A bibliography file must be specified.')
+            raise FileNotFoundError("A bibliography file must be specified.")
 
         if fmt not in supported_fmts:
-            raise NameError('Format %s not currently supported.' % (fmt))
+            raise NameError("Format %s not currently supported." % (fmt))
 
-        with open(bibfile, 'r') as f:
+        with open(bibfile, "r") as f:
             parser = bibtexparser.bparser.BibTexParser(common_strings=True)
             bibliography = bibtexparser.load(f, parser=parser).entries
 
-        ret = {k['ID']: {} for k in bibliography}
+        ret = {k["ID"]: {} for k in bibliography}
 
         for entry in bibliography:
-            ret[entry['ID']] = entry_to_bibtex(entry)
+            ret[entry["ID"]] = entry_to_bibtex(entry)
 
         return ret
 
@@ -316,8 +318,8 @@ class Reference_Handler(object):
         module=None,
         level=1,
         note=None,
-        fmt='bibtex',
-        doi=None
+        fmt="bibtex",
+        doi=None,
     ):
         """
         Adds a given reference to the internal database.
@@ -353,8 +355,7 @@ class Reference_Handler(object):
 
         if alias is None or raw is None or module is None or note is None:
             raise NameError(
-                'Need to provide the "alias", "raw", "module" and "note" '
-                'arguments'
+                'Need to provide the "alias", "raw", "module" and "note" arguments'
             )
 
         doi = self._extract_doi(raw, fmt)
@@ -365,25 +366,16 @@ class Reference_Handler(object):
             self._create_citation(raw=raw, alias=alias, doi=doi)
             reference_id = self.cur.lastrowid
             self._create_context(
-                reference_id=reference_id,
-                module=module,
-                note=note,
-                level=level
+                reference_id=reference_id, module=module, note=note, level=level
             )
         else:
             context_id = self._get_context_id(
-                reference_id=reference_id,
-                module=module,
-                note=note,
-                level=level
+                reference_id=reference_id, module=module, note=note, level=level
             )
 
             if context_id is None:
                 self._create_context(
-                    reference_id=reference_id,
-                    module=module,
-                    note=note,
-                    level=level
+                    reference_id=reference_id, module=module, note=note, level=level
                 )
             else:
                 self._update_counter(context_id=context_id)
@@ -404,47 +396,38 @@ class Reference_Handler(object):
             "UPDATE context SET count = count + 1 WHERE id=?;", (context_id,)
         )
 
-    def _extract_doi(self, raw=None, fmt='bibtex'):
+    def _extract_doi(self, raw=None, fmt="bibtex"):
         """
         Parses DOI from bibliographic format
         """
 
         if fmt not in supported_fmts:
-            raise NameError('Format %s not currently supported.' % (fmt))
+            raise NameError("Format %s not currently supported." % (fmt))
 
-        if fmt == 'bibtex':
+        if fmt == "bibtex":
             ret = bibtexparser.loads(raw)
             ret = ret.entries[0]
-            if 'doi' in ret.keys():
-                return ret['doi']
+            if "doi" in ret.keys():
+                return ret["doi"]
 
     def _initialize_tables(self):
         """
         Initializes the citation and context tables
         """
 
-        self.cur.execute(
-            """CREATE TABLE IF NOT EXISTS "citation" (
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS "citation" (
             "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
             "alias" TEXT NOT NULL UNIQUE,
             "raw"	TEXT NOT NULL UNIQUE,
             "doi"	TEXT UNIQUE
             );
-            """
-        )
+            """)
 
-        self.cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_raw on citation (raw);"
-        )
-        self.cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_alias on citation (alias);"
-        )
-        self.cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_doi on citation (doi);"
-        )
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_raw on citation (raw);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_alias on citation (alias);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_doi on citation (doi);")
 
-        self.cur.execute(
-            """
+        self.cur.execute("""
             CREATE TABLE IF NOT EXISTS "context" (
             "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
             "reference_id" INTEGER NOT NULL,
@@ -454,21 +437,14 @@ class Reference_Handler(object):
             "level" INTEGER NOT NULL,
             FOREIGN KEY(reference_id) REFERENCES Citation(id)
             );
-            """
-        )
+            """)
 
         self.cur.execute(
             "CREATE INDEX IF NOT EXISTS idx_refid on context (reference_id);"
         )
-        self.cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_module on context (module);"
-        )
-        self.cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_count on context (count);"
-        )
-        self.cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_level on context (level);"
-        )
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_module on context (module);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_count on context (count);")
+        self.cur.execute("CREATE INDEX IF NOT EXISTS idx_level on context (level);")
 
         self.conn.commit()
 
@@ -484,13 +460,9 @@ class Reference_Handler(object):
                         'Variables "raw" or "alias" or "DOI" must be input.'
                     )
                 else:
-                    self.cur.execute(
-                        "SELECT id FROM citation WHERE doi=?;" (doi,)
-                    )
+                    self.cur.execute("SELECT id FROM citation WHERE doi=?;", (doi,))
             else:
-                self.cur.execute(
-                    "SELECT id FROM citation WHERE alias=?;" (alias,)
-                )
+                self.cur.execute("SELECT id FROM citation WHERE alias=?;", (alias,))
         else:
             self.cur.execute("SELECT id FROM citation WHERE raw=?;", (raw,))
 
@@ -501,18 +473,13 @@ class Reference_Handler(object):
 
         return ret[0][0]
 
-    def _get_context_id(
-        self, reference_id=None, module=None, note=None, level=None
-    ):
+    def _get_context_id(self, reference_id=None, module=None, note=None, level=None):
         """
         Gets the ID of the context if exists. A context is specified by
         (reference_id, module, note, level) combination
         """
 
-        if (
-            reference_id is None or module is None or note is None or
-            level is None
-        ):
+        if reference_id is None or module is None or note is None or level is None:
             raise NameError(
                 'The variables "reference_id" and "module" and "note" and '
                 '"level" must be specified'
@@ -520,7 +487,8 @@ class Reference_Handler(object):
 
         self.cur.execute(
             "SELECT id FROM context WHERE reference_id=? AND module=? AND "
-            "note=? AND level=?;", (reference_id, module, note, level)
+            "note=? AND level=?;",
+            (reference_id, module, note, level),
         )
 
         ret = self.cur.fetchall()
@@ -536,18 +504,16 @@ class Reference_Handler(object):
         """
 
         if raw is None or alias is None:
-            raise NameError('The value for raw and alias must be provided')
+            raise NameError("The value for raw and alias must be provided")
         else:
             self.cur.execute(
                 "INSERT INTO citation (raw, alias, doi) VALUES (?, ?, ?);",
-                (raw, alias, doi)
+                (raw, alias, doi),
             )
 
         self.conn.commit()
 
-    def _create_context(
-        self, reference_id=None, module=None, note=None, level=None
-    ):
+    def _create_context(self, reference_id=None, module=None, note=None, level=None):
         """
         Adds a new record to the context table using the combination of the
         provided arguments.
@@ -558,7 +524,8 @@ class Reference_Handler(object):
 
         self.cur.execute(
             "INSERT INTO context (reference_id, module, note, count, level) "
-            "VALUES (?, ?, ?, ?, ?)", (reference_id, module, note, 1, level)
+            "VALUES (?, ?, ?, ?, ?)",
+            (reference_id, module, note, 1, level),
         )
 
         self.conn.commit()
@@ -569,9 +536,7 @@ class Reference_Handler(object):
         """
         if reference_id is None:
             if alias is None:
-                raise NameError(
-                    "The 'reference_id' or 'alias' must be provided."
-                )
+                raise NameError("The 'reference_id' or 'alias' must be provided.")
             else:
                 self.cur.execute(
                     """
@@ -583,7 +548,8 @@ class Reference_Handler(object):
                     ) t2
                     ON t1.id = t2.reference_id
                     WHERE alias = ?
-                """, (alias,)
+                """,
+                    (alias,),
                 )
 
         else:
@@ -597,7 +563,8 @@ class Reference_Handler(object):
                 ) t2
                 ON t1.id = t2.reference_id
                 WHERE id = ?
-            """, (reference_id,)
+            """,
+                (reference_id,),
             )
 
         ret = self.cur.fetchall()
@@ -658,13 +625,13 @@ class Reference_Handler(object):
                         SELECT id, reference_id FROM context
                     ) t2
                     ON citation.id = t2.reference_id WHERE alias=?
-                """, (alias,)
+                """,
+                    (alias,),
                 )
 
         else:
             self.cur.execute(
-                "SELECT COUNT(*) FROM context WHERE reference_id = ?;",
-                (reference_id,)
+                "SELECT COUNT(*) FROM context WHERE reference_id = ?;", (reference_id,)
             )
 
         return self.cur.fetchall()[0][0]
@@ -683,22 +650,22 @@ class Reference_Handler(object):
             DOI: 10.1021/jacs.8b08648
         """
 
-        result = ''
-        if 'author' in data:
-            result += '; '.join(data['author'].split(' and '))
-            if result[-1] != '.':
-                result += '.'
-        if 'title' in data:
-            result += ' ' + data['title'].rstrip('.') + '.'
-        if 'journal' in data:
-            result += ' ' + data['journal']
-        if 'year' in data:
+        result = ""
+        if "author" in data:
+            result += "; ".join(data["author"].split(" and "))
+            if result[-1] != ".":
+                result += "."
+        if "title" in data:
+            result += " " + data["title"].rstrip(".") + "."
+        if "journal" in data:
+            result += " " + data["journal"]
+        if "year" in data:
             result += f" {data['year']},"
-        if 'volume' in data:
+        if "volume" in data:
             result += f" {data['volume']},"
-        if 'pages' in data:
+        if "pages" in data:
             result += f" {data['pages']}."
-        if 'doi' in data:
+        if "doi" in data:
             result += f" DOI: {data['doi']}"
 
         return result
@@ -715,23 +682,23 @@ class Reference_Handler(object):
             (accessed 2019-09-10).
         """
 
-        result = ''
-        if 'author' in data:
-            result += '; '.join(data['author'].split(' and '))
-            if result[-1] != '.':
-                result += '.'
-        if 'title' in data:
-            result += ' ' + data['title'].rstrip('.') + '.'
+        result = ""
+        if "author" in data:
+            result += "; ".join(data["author"].split(" and "))
+            if result[-1] != ".":
+                result += "."
+        if "title" in data:
+            result += " " + data["title"].rstrip(".") + "."
         result += " Ph.D. Dissertation"
-        if 'school' in data:
+        if "school" in data:
             result += f", {data['school']}"
-        if 'address' in data:
+        if "address" in data:
             result += f", {data['address']}"
-        if 'year' in data:
+        if "year" in data:
             result += f", {data['year']}."
-        if 'url' in data:
+        if "url" in data:
             result += f", {data['url']}"
-        if 'doi' in data:
+        if "doi" in data:
             result += f", DOI: {data['doi']}"
 
         return result
@@ -747,29 +714,33 @@ class Reference_Handler(object):
             University: Pittsburgh, PA, 1982.
         """
 
-        result = ''
+        result = ""
 
-        if 'author' in data:
-            result += '; '.join(data['author'].split(' and '))
-            if result[-1] != '.':
-                result += '.'
-        if 'title' in data:
-            result += ' ' + data['title']
-        if 'version' in data:
+        if "author" in data:
+            result += "; ".join(data["author"].split(" and "))
+            if result[-1] != ".":
+                result += "."
+            result += " "
+        if "title" in data:
+            result += data["title"]
+        if "version" in data:
             result += f", version {data['version']};"
         else:
-            result += ';'
+            result += ";"
 
-        if 'organization' in data:
-            result += ' ' + data['organization']
-        if 'address' in data:
+        if "organization" in data:
+            result += " " + data["organization"]
+        if "address" in data:
             result += f": {data['address']}"
-        if 'url' in data:
+        if "url" in data:
             result += f", {data['url']}"
-        if 'doi' in data:
+        if "doi" in data:
             result += f", DOI: {data['doi']}"
 
         return result
+
+    def format_software(self, data):
+        return self.format_misc(self, data)
 
     def format_inbook(self, data):
         """Format a chapter or part of a book or series BibTex record
@@ -786,26 +757,26 @@ class Reference_Handler(object):
             2018; pp 33−44. DOI: 10.1021/bk-2018-1295.ch003
         """
 
-        result = ''
-        if 'author' in data:
-            result += '; '.join(data['author'].split(' and '))
-            if result[-1] != '.':
-                result += '.'
-        if 'title' in data:
-            result += ' ' + data['title'].rstrip('.') + '. In'
-        if 'booktitle' in data:
+        result = ""
+        if "author" in data:
+            result += "; ".join(data["author"].split(" and "))
+            if result[-1] != ".":
+                result += "."
+        if "title" in data:
+            result += " " + data["title"].rstrip(".") + ". In"
+        if "booktitle" in data:
             result += f" {data['booktitle']}"
-        if 'series' in data:
+        if "series" in data:
             result += f"; {data['series']}"
-        if 'publisher' in data:
+        if "publisher" in data:
             result += f"; {data['publisher']}"
-        if 'place' in data:
+        if "place" in data:
             result += f", {data['place']}"
-        if 'year' in data:
+        if "year" in data:
             result += f", {data['year']}."
-        if 'url' in data:
+        if "url" in data:
             result += f", {data['url']}"
-        if 'doi' in data:
+        if "doi" in data:
             result += f", DOI: {data['doi']}"
 
         return result
@@ -817,13 +788,13 @@ class Reference_Handler(object):
         return subscript_re.sub(self._decode_subscript, text)
 
     def _decode_subscript(self, match):
-        result = ''
+        result = ""
         for digit in list(match[1]):
             result += subscript[digit]
         return result
 
     def _decode_superscript(self, match):
-        result = ''
+        result = ""
         for digit in list(match[1]):
             result += superscript[digit]
         return result

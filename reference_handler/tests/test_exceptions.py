@@ -9,7 +9,7 @@ import pytest
 from . import build_filenames
 from inspect import signature
 
-database = build_filenames.build_data_filename('database.db')
+database = build_filenames.build_data_filename("database.db")
 
 lammps_citation = """
         @article{PLIMPTON19951,
@@ -47,10 +47,8 @@ namd_citation = """
 
 def _create_db():
     """Boiler plate"""
-    database_name = 'tmp.db'
-    database = build_filenames.build_scratch_filename(
-        database_name
-    )  # noqa: F821
+    database_name = "tmp.db"
+    database = build_filenames.build_scratch_filename(database_name)  # noqa: F821
 
     if os.path.exists(database):
         os.remove(database)
@@ -58,20 +56,19 @@ def _create_db():
 
 
 @pytest.fixture(
-    scope='function',
+    scope="function",
     params=[
-        x for x in range(
-            len(
-                signature(reference_handler.Reference_Handler.cite).parameters
-            ) - 1
+        x
+        for x in range(
+            len(signature(reference_handler.Reference_Handler.cite).parameters) - 1
         )
-    ]
+    ],
 )
 def create_test_arg(request):
     test_arg = [None] * (
         len(signature(reference_handler.Reference_Handler.cite).parameters) - 1
     )
-    test_arg[request.param] = 'string'
+    test_arg[request.param] = "string"
     yield tuple(test_arg)
 
 

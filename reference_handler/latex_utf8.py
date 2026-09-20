@@ -70,54 +70,53 @@ import re
 import typing
 import unicodedata
 
-alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 # LaTeX characters in accent macros of form \<char>{<letter>}, i.e. \"{u}
 accent = {
-    '"': '\N{Combining Diaeresis}',
-    "'": '\N{Combining Acute Accent}',
-    '.': '\N{Combining Dot Above}',
-    '=': '\N{Combining Macron}',
-    '^': '\N{Combining Circumflex Accent}',
-    '`': '\N{Combining Grave Accent}',
-    '|': '\N{Combining Vertical Line Above}',
-    '~': '\N{Combining Tilde}',
-    'b': '\N{Combining Macron Below}',
-    'c': '\N{Combining Cedilla}',
-    'C': '\N{Combining Double Grave Accent}',
-    'd': '\N{Combining Dot Below}',
-    'f': '\N{Combining Inverted Breve}',
-    'h': '\N{Combining Hook Above}',
-    'H': '\N{Combining Double Acute Accent}',
-    'k': '\N{Combining Ogonek}',
-    'r': '\N{Combining Ring Above}',
-    't': '\N{Combining Double Inverted Breve}',
-    'u': '\N{Combining Breve}',
-    'U': '\N{Combining Double Vertical Line Above}',
-    'v': '\N{Combining Caron}'
+    '"': "\N{COMBINING DIAERESIS}",
+    "'": "\N{COMBINING ACUTE ACCENT}",
+    ".": "\N{COMBINING DOT ABOVE}",
+    "=": "\N{COMBINING MACRON}",
+    "^": "\N{COMBINING CIRCUMFLEX ACCENT}",
+    "`": "\N{COMBINING GRAVE ACCENT}",
+    "|": "\N{COMBINING VERTICAL LINE ABOVE}",
+    "~": "\N{COMBINING TILDE}",
+    "b": "\N{COMBINING MACRON BELOW}",
+    "c": "\N{COMBINING CEDILLA}",
+    "C": "\N{COMBINING DOUBLE GRAVE ACCENT}",
+    "d": "\N{COMBINING DOT BELOW}",
+    "f": "\N{COMBINING INVERTED BREVE}",
+    "h": "\N{COMBINING HOOK ABOVE}",
+    "H": "\N{COMBINING DOUBLE ACUTE ACCENT}",
+    "k": "\N{COMBINING OGONEK}",
+    "r": "\N{COMBINING RING ABOVE}",
+    "t": "\N{COMBINING DOUBLE INVERTED BREVE}",
+    "u": "\N{COMBINING BREVE}",
+    "U": "\N{COMBINING DOUBLE VERTICAL LINE ABOVE}",
+    "v": "\N{COMBINING CARON}",
 }
 
 # The regexp to detect the LaTeX accent commands. The two added characters
 # are the dotless i and j.
-accent_re = re.compile(
-    r'\\([' + ''.join(accent.keys()) + r']){([a-zA-Z\u0131\u0237])}'
-)
+accent_re = re.compile(r"\\([" + "".join(accent.keys()) + r"]){([a-zA-Z\u0131\u0237])}")
 
 # Invert the accent dictionary for each letter in the alphabet to make
 # a dictionary of LaTeX encodings.
 encoding = {}
 for key, val in accent.items():
     for char in list(alphabet):
-        encoding[char + val] = '\\' + key + '{' + char + '}'
+        encoding[char + val] = "\\" + key + "{" + char + "}"
         # handle any precombined versions of the character
-        string = unicodedata.normalize('NFC', char + val)
+        string = unicodedata.normalize("NFC", char + val)
         if len(string) == 1:
             encoding[string] = encoding[char + val]
     for char in [
-        '\N{Latin Small Letter Dotless I}', '\N{Latin Small Letter Dotless J}'
+        "\N{LATIN SMALL LETTER DOTLESS I}",
+        "\N{LATIN SMALL LETTER DOTLESS J}",
     ]:
-        encoding[char + val] = r'\%s{%s}' % (key, char)
-        string = unicodedata.normalize('NFC', char + val)
+        encoding[char + val] = r"\%s{%s}" % (key, char)
+        string = unicodedata.normalize("NFC", char + val)
         # These characters have no precombined versions, but check anyway
         if len(string) == 1:
             encoding[string] = encoding[char + val]
@@ -137,20 +136,20 @@ def _decode_latex_accent(match: typing.Match) -> str:
 
 # LaTeX single character symbols
 symbol = {
-    'i': '\N{Latin Small Letter Dotless I}',
-    'j': '\N{Latin Small Letter Dotless J}',
-    'l': '\N{Latin Small Letter L With Stroke}',
-    'L': '\N{Latin Capital Letter L With Stroke}',
-    'o': '\N{Latin Small Letter O With Stroke}',
-    'O': '\N{Latin Capital Letter O With Stroke}'
+    "i": "\N{LATIN SMALL LETTER DOTLESS I}",
+    "j": "\N{LATIN SMALL LETTER DOTLESS J}",
+    "l": "\N{LATIN SMALL LETTER L WITH STROKE}",
+    "L": "\N{LATIN CAPITAL LETTER L WITH STROKE}",
+    "o": "\N{LATIN SMALL LETTER O WITH STROKE}",
+    "O": "\N{LATIN CAPITAL LETTER O WITH STROKE}",
 }
 
 # The regexp to detect the LaTeX commands for special characters
-symbol_re = re.compile(r'\\([' + ''.join(symbol.keys()) + '])')
+symbol_re = re.compile(r"\\([" + "".join(symbol.keys()) + "])")
 
 # Invert the symbol dictionary to make a dictionary of LaTeX encodings.
 for key, val in symbol.items():
-    encoding[val] = '\\' + key
+    encoding[val] = "\\" + key
 
 
 def _decode_latex_symbol(match: typing.Match) -> str:
@@ -166,10 +165,10 @@ def _decode_latex_symbol(match: typing.Match) -> str:
 
 
 # LaTeX dashes
-dash = {'--': '\N{EN Dash}', '---': '\N{EM Dash}'}
+dash = {"--": "\N{EN DASH}", "---": "\N{EM DASH}"}
 
 # The regexp to detect the LaTeX commands for dashes
-dash_re = re.compile(r'([^-]?)(-{2,3})([^-]?)')
+dash_re = re.compile(r"([^-]?)(-{2,3})([^-]?)")
 
 # Invert the dictionary tomake a dictionary of LaTeX encodings.
 for key, val in dash.items():
@@ -205,13 +204,11 @@ def decode_latex(text: str) -> str:
     """
 
     return brace_re.sub(
-        r'\1',
+        r"\1",
         accent_re.sub(
             _decode_latex_accent,
-            symbol_re.sub(
-                _decode_latex_symbol, dash_re.sub(_decode_latex_dash, text)
-            )
-        )
+            symbol_re.sub(_decode_latex_symbol, dash_re.sub(_decode_latex_dash, text)),
+        ),
     )
 
 
@@ -228,7 +225,7 @@ def encode_latex(text: str) -> str:
     """
 
     # Map the double character representations
-    text2 = ''
+    text2 = ""
     char1 = text[0]
     i = 1
     len_text = len(text)
@@ -250,7 +247,7 @@ def encode_latex(text: str) -> str:
         text2 += char1
 
     # Map the single characters representations
-    result = ''
+    result = ""
     for char in list(text2):
         if char in encoding:
             result += encoding[char]
@@ -260,7 +257,7 @@ def encode_latex(text: str) -> str:
     return result
 
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     text = r"""
 (Vorlova_2015) Barbora Vorlov{\'{a}} and Dana Nachtigallov{\'{a}} and Jana
 Jir{\'{a}}skov{\'{a}}-Van{\'{\i}}{\v{c}}kov{\'{a}} and Haresh Ajani and Petr
