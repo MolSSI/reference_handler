@@ -6,7 +6,6 @@ Handles the primary class
 """
 
 import sqlite3
-import pprint
 import re
 
 import bibtexparser
@@ -259,10 +258,10 @@ class Reference_Handler(object):
                     plain_text = self.format_inbook(parse)
                 elif entry_type == "phdthesis":
                     plain_text = self.format_phdthesis(parse)
+                elif entry_type == "book":
+                    plain_text = self.format_book(parse)
                 else:
-                    plain_text = f"Do not have a handler for '{entry_type}':"
-                    plain_text += "\n"
-                    plain_text += pprint.pformat(parse)
+                    plain_text = self.format_other(parse)
 
                 plain_text = decode_latex(plain_text)
                 plain_text = self.decode_math_symbols(plain_text)
@@ -740,7 +739,76 @@ class Reference_Handler(object):
         return result
 
     def format_software(self, data):
-        return self.format_misc(self, data)
+        return self.format_misc(data)
+
+    def format_book(self, data):
+        """Format a book BibTex record
+
+        ACS style:
+            Hansen, J.-P.; McDonald, I. R. Theory of Simple Liquids, 4th ed.;
+            Academic Press: Oxford, 2013. DOI: 10.1016/C2010-0-66723-X
+        """
+        result = ""
+        names = data.get("author", data.get("editor"))
+        if names is not None:
+            result += "; ".join(names.split(" and "))
+            if "author" not in data:
+                result += ", Eds"
+            if result[-1] != ".":
+                result += "."
+        if "title" in data:
+            result += " " + data["title"].rstrip(".")
+            if "edition" in data:
+                result += f", {data['edition']} ed."
+            result += ";" if "publisher" in data else "."
+        if "publisher" in data:
+            result += f" {data['publisher']}"
+            if "address" in data:
+                result += f": {data['address']}"
+            result += ","
+        if "year" in data:
+            result += f" {data['year']}."
+        if "doi" in data:
+            result += f" DOI: {data['doi']}"
+        elif "url" in data:
+            result += f" {data['url']}"
+        return result.strip()
+
+    def format_other(self, data):
+        """Format a record of a type without its own style: the authors, title,
+        where it appeared, the year and the DOI or URL."""
+        parts = []
+        names = data.get("author", data.get("editor"))
+        if names is not None:
+            text = "; ".join(names.split(" and "))
+            parts.append(text if text.endswith(".") else text + ".")
+        if "title" in data:
+            parts.append(data["title"].rstrip(".") + ".")
+        where = next(
+            (
+                data[key]
+                for key in (
+                    "journal",
+                    "booktitle",
+                    "publisher",
+                    "institution",
+                    "school",
+                )
+                if key in data
+            ),
+            None,
+        )
+        if where is not None and "year" in data:
+            parts.append(f"{where}, {data['year']}.")
+        elif where is not None:
+            parts.append(f"{where}.")
+        elif "year" in data:
+            parts.append(f"{data['year']}.")
+        if "doi" in data:
+            parts.append(f"DOI: {data['doi']}")
+        elif "url" in data:
+            parts.append(data["url"])
+        return " ".join(parts)
 
     def format_inbook(self, data):
         """Format a chapter or part of a book or series BibTex record

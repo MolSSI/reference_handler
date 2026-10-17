@@ -378,3 +378,40 @@ def test_cite_return():
     assert lammps_id1 == lammps_id2
     assert lammps_id1 == lammps_id3
     assert namd_id == 2
+
+
+def test_format_book_software_and_other():
+    """Books, software, and types without their own style are formatted, not
+    reported as having no handler."""
+    import bibtexparser
+
+    from reference_handler import Reference_Handler
+
+    book = bibtexparser.loads("""@book{HansenMcDonald,
+        author = {Jean-Pierre Hansen and Ian R. McDonald},
+        title = {Theory of Simple Liquids},
+        edition = {4th},
+        publisher = {Academic Press},
+        address = {Oxford},
+        year = {2013},
+        doi = {10.1016/C2010-0-66723-X}
+        }""").entries[0]
+    text = Reference_Handler.format_book(None, book)
+    assert text == (
+        "Jean-Pierre Hansen; Ian R. McDonald. Theory of Simple Liquids, 4th ed.; "
+        "Academic Press: Oxford, 2013. DOI: 10.1016/C2010-0-66723-X"
+    )
+
+    software = {"author": "A. Person", "title": "Code", "version": "1.0"}
+    handler = Reference_Handler.__new__(Reference_Handler)
+    assert handler.format_software(software).startswith("A. Person. Code, version")
+
+    report = {
+        "author": "A. Person",
+        "title": "A report.",
+        "institution": "An Institute",
+        "year": "2020",
+    }
+    assert Reference_Handler.format_other(None, report) == (
+        "A. Person. A report. An Institute, 2020."
+    )
