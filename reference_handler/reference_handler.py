@@ -159,7 +159,10 @@ class Reference_Handler(object):
         SQLite database and bulding the two tables within it.
         """
 
-        self.conn = sqlite3.connect(database)
+        # Wait for a lock rather than failing at once: the iterations of a parallel
+        # loop cite into the job's one database at the same time, on a shared file
+        # system.
+        self.conn = sqlite3.connect(database, timeout=30.0)
         self.cur = self.conn.cursor()
         self._initialize_tables()
 
@@ -359,30 +362,62 @@ class Reference_Handler(object):
 
         doi = self._extract_doi(raw, fmt)
 
-        reference_id = self._get_reference_id(raw=raw, alias=alias, doi=doi)
+        try:
+            reference_id = self._find_citation(raw=raw, alias=alias, doi=doi)
 
-        if reference_id is None:
-            self._create_citation(raw=raw, alias=alias, doi=doi)
-            reference_id = self.cur.lastrowid
-            self._create_context(
-                reference_id=reference_id, module=module, note=note, level=level
-            )
-        else:
-            context_id = self._get_context_id(
-                reference_id=reference_id, module=module, note=note, level=level
-            )
-
-            if context_id is None:
+            if reference_id is None:
+                self._create_citation(raw=raw, alias=alias, doi=doi)
+                reference_id = self.cur.lastrowid
                 self._create_context(
                     reference_id=reference_id, module=module, note=note, level=level
                 )
             else:
-                self._update_counter(context_id=context_id)
+                context_id = self._get_context_id(
+                    reference_id=reference_id, module=module, note=note, level=level
+                )
 
-        # Save the changes!
-        self.conn.commit()
+                if context_id is None:
+                    self._create_context(
+                        reference_id=reference_id, module=module, note=note, level=level
+                    )
+                else:
+                    self._update_counter(context_id=context_id)
+
+            # Save the changes!
+            self.conn.commit()
+        except Exception:
+            # Never leave the transaction open: it would hold the database's lock,
+            # and every other writer -- e.g. the iterations of a parallel loop --
+            # would fail with "database is locked".
+            self.conn.rollback()
+            raise
 
         return reference_id
+
+    def _find_citation(self, raw=None, alias=None, doi=None):
+        """The id of the citation with this raw text, or else this alias or DOI.
+
+        The same reference cited with a different text -- e.g. a program's own
+        citation, whose text holds its version, after an update -- is the same
+        citation; its text is brought up to date. Inserting it again would break
+        the uniqueness of the alias and DOI (a resumed job's
+        "UNIQUE constraint failed: citation.doi").
+        """
+        reference_id = self._get_reference_id(raw=raw)
+        if reference_id is not None:
+            return reference_id
+        for key, value in (("alias", alias), ("doi", doi)):
+            if value is None:
+                continue
+            self.cur.execute(f"SELECT id FROM citation WHERE {key}=?;", (value,))
+            ret = self.cur.fetchall()
+            if len(ret) > 0:
+                reference_id = ret[0][0]
+                self.cur.execute(
+                    "UPDATE citation SET raw=? WHERE id=?;", (raw, reference_id)
+                )
+                return reference_id
+        return None
 
     def _update_counter(self, context_id=None):
         """
